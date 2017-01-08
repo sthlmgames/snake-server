@@ -1,82 +1,91 @@
-
-
 const app = require('express')();
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
 const port = process.env.PORT || 3000;
 
 const messages = {
-  YOU_CONNECTED: 'you-connected',
-  GAME_STARTED: 'game-started',
-  PLAYERS: 'players',
+    YOU_CONNECTED: 'you-connected',
+    GAME_STARTED: 'game-started',
+    PLAYERS: 'players',
 }
 
-// class BodyPart {
-//     constructor() {
-//         this._x = 0;
-//         this._y = 0;
-//     }
-// }
+class BodyPart {
+
+    constructor(x, y) {
+        this._x = x;
+        this._y = y;
+    }
+}
 
 class Player {
-    constructor (id) {
+
+    constructor(id) {
         this._id = id;
-        // this._bodyParts = [];
-        // this.expandBody();
-        // setTimeout(() => {
-        //   this.expandBody();
-        // }, 3000)
+        this._bodyParts = [];
+
+        console.log(game.players.size);
+        if (game.players.size === 0) {
+          this._bodyParts.push(new BodyPart(0,0));
+        } else if (game.players.size === 1) {
+          this._bodyParts.push(new BodyPart(55,55));
+        } else if (game.players.size === 2) {
+          this._bodyParts.push(new BodyPart(155,155));
+        }
     }
-
-    // expandBody() {
-    //      this._bodyParts.push(new BodyPart());
-    //      this._socket.emit('server-message', {
-    //        player: this._bodyParts
-    //      });
-    //      console.log(this);
-    // }
 }
-
-// app.get('/', function(req, res){
-//   res.sendFile(__dirname + '/index.html');
-// });
 
 class Game {
 
-  constructor(io, players) {
-    this._io = io;
-    this._players = players;
+    constructor() {
+        this._players = new Map();
 
-    this._io.emit(messages.GAME_STARTED);
+        //this._io.emit(messages.GAME_STARTED);
 
-    this._io.emit(messages.PLAYERS, [...this._players]);
-  }
+        //this._io.emit(messages.PLAYERS, [...this._players]);
+    }
 
+    get players () {
+      return this._players;
+    }
+
+    addPlayer(id) {
+      this._players.set(id, new Player(id));
+    }
+
+    removePlayer(id) {
+      this._players.delete(id);
+    }
 }
 
-const players = new Map();
+const game = new Game();
 
-let game;
+function onConnection(socket) {
+    console.log('connected: ', socket.id);
+
+    game.addPlayer(socket.id);
+
+    socket.emit(messages.YOU_CONNECTED, {
+        id: socket.id
+    });
+
+    if (game.players.size === 1) {
+        //game.start();
+        // game = new Game(io);
+
+        io.emit(messages.GAME_STARTED);
+    }
+
+    io.emit(messages.PLAYERS, [...game.players]);
+
+    socket.on('disconnect', () => {
+      console.log('disconnected: ', socket.id);
+      game.removePlayer(socket.id);
+      io.emit(messages.PLAYERS, [...game.players]);
+    });
+}
+
+io.on('connection', onConnection);
 
 http.listen(port, 'localhost', function() {
-  console.log("listening on *:" + port);
+    console.log("listening on *:" + port);
 });
-
-io.on('connection', (socket) => {
-  console.log('connected: ', socket.id);
-  players.set(socket.id, new Player(socket.id));
-
-  socket.emit(messages.YOU_CONNECTED, {
-    id: socket.id
-  });
-
-  socket.on('disconnect', () => {
-    console.log('disconnected: ', socket.id);
-    players.delete(socket.id);
-  });
-
-  if (players.size === 1 & !game) {
-    game = new Game(io, players);
-  }
-});
-
