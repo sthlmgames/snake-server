@@ -7,6 +7,7 @@ const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 20,
     PLAYER_MOVE_TIMER: 40,
+    GAME_LOOP: 100,
     world: {
         WIDTH: 800,
         HEIGHT: 500
@@ -63,18 +64,27 @@ class Player {
         this._id = id;
         this._bodyParts = [];
         this._bodyParts.push(new BodyPart(position));
+        this._direction = null;
     }
 
-    move(direction) {
+    get direction() {
+        return this._direction;
+    }
+
+    set direction(newDirection) {
+        this._direction = newDirection;
+    }
+
+    move() {
         const bodyPart = this._bodyParts[0];
 
-        if (direction === settings.playerActions.directions.UP) {
+        if (this._direction === settings.playerActions.directions.UP) {
             bodyPart.y -= settings.GRID_SIZE;
-        } else if (direction === settings.playerActions.directions.DOWN) {
+        } else if (this._direction === settings.playerActions.directions.DOWN) {
             bodyPart.y += settings.GRID_SIZE;
-        } else if (direction === settings.playerActions.directions.LEFT) {
+        } else if (this._direction === settings.playerActions.directions.LEFT) {
             bodyPart.x -= settings.GRID_SIZE;
-        } else if (direction === settings.playerActions.directions.RIGHT) {
+        } else if (this._direction === settings.playerActions.directions.RIGHT) {
             bodyPart.x += settings.GRID_SIZE;
         }
     }
@@ -82,12 +92,25 @@ class Player {
 
 class Game {
 
-    constructor() {
+    constructor(postGameLoopCallback) {
         this._players = new Map();
+
+        this._startGameLoop();
+        this._postGameLoopCallback = postGameLoopCallback;
     }
 
     get players() {
         return this._players;
+    }
+
+    _startGameLoop() {
+        setInterval(() => {
+            for (const player of this._players.values()) {
+                player.move();
+            }
+
+            this._postGameLoopCallback();
+        }, settings.GAME_LOOP);
     }
 
     getRandomPosition(dimension) {
@@ -111,8 +134,6 @@ class Game {
         this._players.delete(id);
     }
 }
-
-const game = new Game();
 
 function onConnection(socket) {
     console.log('connected: ', socket.id);
@@ -147,12 +168,16 @@ function onDisconnection(socket) {
 function onPlayerAction(player, action) {
     console.log(player, action);
 
-    player.move(action);
+    player.direction = action;
+}
 
+function onGameLoopFinished() {
     io.emit(settings.messages.PLAYERS, [...game.players]);
 }
 
 io.on(settings.messages.CONNECT, onConnection);
+
+const game = new Game(onGameLoopFinished);
 
 http.listen(port, 'localhost', function () {
     console.log("listening on *:" + port);
