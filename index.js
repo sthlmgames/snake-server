@@ -7,7 +7,8 @@ const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 20,
     PLAYER_MOVE_TIMER: 40,
-    GAME_LOOP: 100,
+    GAME_LOOP_TIMER: 100,
+    SPAWN_BODYPART_TIMER: 5000,
     world: {
         WIDTH: 800,
         HEIGHT: 500
@@ -63,8 +64,11 @@ class Player {
     constructor(id, position) {
         this._id = id;
         this._bodyParts = [];
-        this._bodyParts.push(new BodyPart(position));
         this._direction = null;
+
+        this.expandBody(position);
+        this.expandBody(position);
+        this.expandBody(position);
     }
 
     get direction() {
@@ -75,18 +79,33 @@ class Player {
         this._direction = newDirection;
     }
 
+    expandBody(position) {
+        const newBodyPart = new BodyPart(position);
+
+        this._bodyParts.push(newBodyPart);
+    }
+
     move() {
-        const bodyPart = this._bodyParts[0];
+        const tail = this._bodyParts.pop(),
+            head = this._bodyParts[0];
+
+        let newHeadX = head.x,
+            newHeadY = head.y;
 
         if (this._direction === settings.playerActions.directions.UP) {
-            bodyPart.y -= settings.GRID_SIZE;
+            newHeadY += -settings.GRID_SIZE;
         } else if (this._direction === settings.playerActions.directions.DOWN) {
-            bodyPart.y += settings.GRID_SIZE;
+            newHeadY += settings.GRID_SIZE;
         } else if (this._direction === settings.playerActions.directions.LEFT) {
-            bodyPart.x -= settings.GRID_SIZE;
+            newHeadX += -settings.GRID_SIZE;
         } else if (this._direction === settings.playerActions.directions.RIGHT) {
-            bodyPart.x += settings.GRID_SIZE;
+            newHeadX += settings.GRID_SIZE;
         }
+
+        this._bodyParts.unshift(tail);
+
+        tail.x = newHeadX;
+        tail.y = newHeadY;
     }
 }
 
@@ -95,8 +114,9 @@ class Game {
     constructor(postGameLoopCallback) {
         this._players = new Map();
 
-        this._startGameLoop();
         this._postGameLoopCallback = postGameLoopCallback;
+
+        this._startGameLoop();
     }
 
     get players() {
@@ -110,7 +130,16 @@ class Game {
             }
 
             this._postGameLoopCallback();
-        }, settings.GAME_LOOP);
+        }, settings.GAME_LOOP_TIMER);
+
+        setInterval(() => {
+            for (const player of this._players.values()) {
+                player.expandBody({
+                    x: this.getRandomPosition(settings.world.WIDTH),
+                    y: this.getRandomPosition(settings.world.HEIGHT),
+                });
+            }
+        }, settings.SPAWN_BODYPART_TIMER);
     }
 
     getRandomPosition(dimension) {
