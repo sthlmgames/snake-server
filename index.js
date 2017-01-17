@@ -7,29 +7,53 @@ const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 20,
     PLAYER_MOVE_TIMER: 40,
-    // directions: {
-    //     UP: 'up',
-    //     DOWN: 'down',
-    //     RIGHT: 'right',
-    //     LEFT: 'left'
-    // },
     world: {
         WIDTH: 800,
         HEIGHT: 500
-    }
-};
+    },
 
-const messages = {
-    YOU_CONNECTED: 'you-connected',
-    GAME_STARTED: 'game-started',
-    PLAYERS: 'players',
-}
+    playerActions: {
+        directions: {
+            UP: 'up',
+            DOWN: 'down',
+            LEFT: 'left',
+            RIGHT: 'right',
+        },
+    },
+
+    messages: {
+        YOU_CONNECTED: 'you-connected',
+        GAME_STARTED: 'game-started',
+        PLAYERS: 'players',
+
+        PLAYER_ACTION: 'player-action',
+
+        DISCONNECT: 'disconnect',
+        CONNECT: 'connection',
+    },
+};
 
 class BodyPart {
 
     constructor(position) {
         this._x = position.x;
         this._y = position.y;
+    }
+
+    get x() {
+        return this._x;
+    }
+
+    get y() {
+        return this._y;
+    }
+
+    set x(newX) {
+        this._x = newX;
+    }
+
+    set y(newY) {
+        this._y = newY;
     }
 }
 
@@ -39,14 +63,20 @@ class Player {
         this._id = id;
         this._bodyParts = [];
         this._bodyParts.push(new BodyPart(position));
+    }
 
-        // if (game.players.size === 0) {
-        //   this._bodyParts.push(new BodyPart(0,0));
-        // } else if (game.players.size === 1) {
-        //   this._bodyParts.push(new BodyPart(55,55));
-        // } else if (game.players.size === 2) {
-        //   this._bodyParts.push(new BodyPart(155,155));
-        // }
+    move(direction) {
+        const bodyPart = this._bodyParts[0];
+
+        if (direction === settings.playerActions.directions.UP) {
+            bodyPart.y -= settings.GRID_SIZE;
+        } else if (direction === settings.playerActions.directions.DOWN) {
+            bodyPart.y += settings.GRID_SIZE;
+        } else if (direction === settings.playerActions.directions.LEFT) {
+            bodyPart.x -= settings.GRID_SIZE;
+        } else if (direction === settings.playerActions.directions.RIGHT) {
+            bodyPart.x += settings.GRID_SIZE;
+        }
     }
 }
 
@@ -74,8 +104,6 @@ class Game {
             y: this.getRandomPosition(settings.world.HEIGHT),
         };
 
-        console.log(position);
-
         this._players.set(id, new Player(id, position));
     }
 
@@ -91,25 +119,40 @@ function onConnection(socket) {
 
     game.addPlayer(socket.id);
 
-    socket.emit(messages.YOU_CONNECTED, {
+    socket.emit(settings.messages.YOU_CONNECTED, {
         id: socket.id,
         settings: settings,
     });
 
     if (game.players.size === 1) {
-        io.emit(messages.GAME_STARTED);
+        io.emit(settings.messages.GAME_STARTED);
     }
 
-    io.emit(messages.PLAYERS, [...game.players]);
+    io.emit(settings.messages.PLAYERS, [...game.players]);
 
-    socket.on('disconnect', () => {
-        console.log('disconnected: ', socket.id);
-        game.removePlayer(socket.id);
-        io.emit(messages.PLAYERS, [...game.players]);
+    socket.on(settings.messages.DISCONNECT, () => {
+        onDisconnection(socket);
+    });
+
+    socket.on(settings.messages.PLAYER_ACTION, (payload) => {
+        onPlayerAction(game.players.get(socket.id), payload);
     });
 }
 
-io.on('connection', onConnection);
+function onDisconnection(socket) {
+    game.removePlayer(socket.id);
+    io.emit(settings.messages.PLAYERS, [...game.players]);
+}
+
+function onPlayerAction(player, action) {
+    console.log(player, action);
+
+    player.move(action);
+
+    io.emit(settings.messages.PLAYERS, [...game.players]);
+}
+
+io.on(settings.messages.CONNECT, onConnection);
 
 http.listen(port, 'localhost', function () {
     console.log("listening on *:" + port);
