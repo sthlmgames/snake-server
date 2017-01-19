@@ -1,7 +1,10 @@
-const app = require('express')();
-const http = require("http").Server(app);
-const io = require("socket.io")(http);
-const port = process.env.PORT || 3000;
+const express = require('express');
+const app =  express();
+const Filehound = require('filehound');
+const server = require('http').Server(app);
+const io = require("socket.io")(server);
+const path = require('path');
+const PORT = process.env.PORT || 3000;
 
 const settings = {
     BACKGROUND_COLOR: '#000000',
@@ -208,6 +211,30 @@ io.on(settings.messages.CONNECT, onConnection);
 
 const game = new Game(onGameLoopFinished);
 
-http.listen(port, 'localhost', function () {
-    console.log("listening on *:" + port);
+app.use(express.static(path.join(__dirname, 'snake-client', 'public')));
+
+server.listen(PORT);
+
+app.get('/', function (req, res) {
+  Filehound.create()
+  .addFilter((file)=>{
+    if (!file['_pathname'].includes('node_modules')){
+        return file;
+    }
+  })
+  .addFilter((file)=>{
+    if (!file['_pathname'].includes('.git')){
+        return file;
+    }
+  })
+  .ignoreHiddenFiles()
+  .find((err, files) => {
+      if (err) {
+          return console.error(`error: ${err}`);
+      }
+      for (var file of files) {
+        console.log(file); // array of files
+      }
+  });
+  res.sendFile(path.join(__dirname, 'snake-client', 'public', 'index.html'));
 });
