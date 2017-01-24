@@ -216,25 +216,5 @@ app.use(express.static(path.join(__dirname, 'snake-client', 'public')));
 server.listen(PORT);
 
 app.get('/', function (req, res) {
-  Filehound.create()
-  .addFilter((file)=>{
-    if (!file['_pathname'].includes('node_modules')){
-        return file;
-    }
-  })
-  .addFilter((file)=>{
-    if (!file['_pathname'].includes('.git')){
-        return file;
-    }
-  })
-  .ignoreHiddenFiles()
-  .find((err, files) => {
-      if (err) {
-          return console.error(`error: ${err}`);
-      }
-      for (var file of files) {
-        console.log(file); // array of files
-      }
-  });
   res.sendFile(path.join(__dirname, 'snake-client', 'public', 'index.html'));
 });
