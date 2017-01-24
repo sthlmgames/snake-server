@@ -4,7 +4,11 @@ const Filehound = require('filehound');
 const server = require('http').Server(app);
 const io = require("socket.io")(server);
 const path = require('path');
+
 const PORT = process.env.PORT || 3000;
+const PUBLIC_FOLDER = '/';
+
+console.log(PUBLIC_FOLDER)
 
 const settings = {
     BACKGROUND_COLOR: '#000000',
@@ -211,10 +215,10 @@ io.on(settings.messages.CONNECT, onConnection);
 
 const game = new Game(onGameLoopFinished);
 
-app.use(express.static(path.join(__dirname, 'snake-client', 'public')));
+app.use(express.static(path.join(__dirname, PUBLIC_FOLDER)));
 
 server.listen(PORT);
 
 app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, 'snake-client', 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, PUBLIC_FOLDER, 'index.html'));
 });
