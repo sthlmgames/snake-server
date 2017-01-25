@@ -1,6 +1,6 @@
 const express = require('express');
-const app =  express();
-const Filehound = require('filehound');
+const app = express();
+const uuid = require('uuid/v4');
 const server = require('http').Server(app);
 const io = require("socket.io")(server);
 const path = require('path');
@@ -13,6 +13,7 @@ const settings = {
     GRID_SIZE: 20,
     PLAYER_MOVE_TIMER: 40,
     GAME_LOOP_TIMER: 100,
+    SPAWN_FRUIT_TIMER: 100,
     world: {
         WIDTH: 800,
         HEIGHT: 500
@@ -30,7 +31,7 @@ const settings = {
     messages: {
         YOU_CONNECTED: 'you-connected',
         GAME_STARTED: 'game-started',
-        PLAYERS: 'players',
+        GAME_STATE: 'game-state',
 
         PLAYER_ACTION: 'player-action',
 
@@ -39,11 +40,16 @@ const settings = {
     },
 };
 
-class BodyPart {
+class GameObject {
 
     constructor(position) {
+        this._id = uuid();
         this._x = position.x;
         this._y = position.y;
+    }
+
+    get id() {
+        return this._id;
     }
 
     get x() {
@@ -62,6 +68,9 @@ class BodyPart {
         this._y = newY;
     }
 }
+
+class Fruit extends GameObject {}
+class BodyPart extends GameObject {}
 
 class Player {
 
@@ -125,6 +134,7 @@ class Game {
 
     constructor(postGameLoopCallback) {
         this._players = new Map();
+        this._fruits = new Map();
 
         this._postGameLoopCallback = postGameLoopCallback;
 
@@ -135,6 +145,10 @@ class Game {
         return this._players;
     }
 
+    get fruits() {
+        return this._fruits;
+    }
+
     _startGameLoop() {
         setInterval(() => {
             for (const player of this._players.values()) {
@@ -143,6 +157,17 @@ class Game {
 
             this._postGameLoopCallback();
         }, settings.GAME_LOOP_TIMER);
+
+        // setInterval(() => {
+        //     const position = {
+        //         x: this.getRandomPosition(settings.world.WIDTH),
+        //         y: this.getRandomPosition(settings.world.HEIGHT),
+        //     };
+        //     const fruit = new Fruit(position);
+        //     this._fruits.set(fruit.id, fruit);
+
+        // }, settings.SPAWN_FRUIT_TIMER);
+
     }
 
     getRandomPosition(dimension) {
@@ -158,8 +183,9 @@ class Game {
             x: this.getRandomPosition(settings.world.WIDTH),
             y: this.getRandomPosition(settings.world.HEIGHT),
         };
+        const player = new Player(id, position);
 
-        this._players.set(id, new Player(id, position));
+        this._players.set(id, player);
     }
 
     removePlayer(id) {
@@ -181,7 +207,7 @@ function onConnection(socket) {
         io.emit(settings.messages.GAME_STARTED);
     }
 
-    io.emit(settings.messages.PLAYERS, [...game.players]);
+    emitGameState();
 
     socket.on(settings.messages.DISCONNECT, () => {
         onDisconnection(socket);
@@ -194,7 +220,7 @@ function onConnection(socket) {
 
 function onDisconnection(socket) {
     game.removePlayer(socket.id);
-    io.emit(settings.messages.PLAYERS, [...game.players]);
+    emitGameState();
 }
 
 function onPlayerAction(player, action) {
@@ -204,7 +230,14 @@ function onPlayerAction(player, action) {
 }
 
 function onGameLoopFinished() {
-    io.emit(settings.messages.PLAYERS, [...game.players]);
+    emitGameState();
+}
+
+function emitGameState() {
+    io.emit(settings.messages.GAME_STATE, {
+        players: [...game.players],
+        fruits: [...game.fruits],
+    });
 }
 
 io.on(settings.messages.CONNECT, onConnection);
@@ -215,6 +248,6 @@ app.use(express.static(path.join(__dirname, PUBLIC_FOLDER)));
 
 server.listen(PORT);
 
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, PUBLIC_FOLDER, 'index.html'));
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname, PUBLIC_FOLDER, 'index.html'));
 });
