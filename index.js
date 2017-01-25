@@ -6,9 +6,7 @@ const io = require("socket.io")(server);
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const PUBLIC_FOLDER = '/';
-
-console.log(PUBLIC_FOLDER)
+const PUBLIC_FOLDER = process.env.PUBLIC_FOLDER || '/';
 
 const settings = {
     BACKGROUND_COLOR: '#000000',
