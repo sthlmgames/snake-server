@@ -90,8 +90,16 @@ class Player {
     }
 
     move() {
-        const tail = this._bodyParts.pop(),
-            head = this._bodyParts[0];
+        const head = this._bodyParts[0];
+
+        if (head.x <= 0 ||
+            head.y <= 0 ||
+            head.x >= settings.world.WIDTH - settings.GRID_SIZE ||
+            head.y >= settings.world.HEIGHT - settings.GRID_SIZE) {
+            return;
+        }
+
+        const tail = this._bodyParts.pop();
 
         let newHeadX = head.x,
             newHeadY = head.y;
