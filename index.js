@@ -13,7 +13,6 @@ const settings = {
     GRID_SIZE: 20,
     PLAYER_MOVE_TIMER: 40,
     GAME_LOOP_TIMER: 100,
-    SPAWN_BODYPART_TIMER: 5000,
     world: {
         WIDTH: 800,
         HEIGHT: 500
@@ -136,15 +135,6 @@ class Game {
 
             this._postGameLoopCallback();
         }, settings.GAME_LOOP_TIMER);
-
-        setInterval(() => {
-            for (const player of this._players.values()) {
-                player.expandBody({
-                    x: this.getRandomPosition(settings.world.WIDTH),
-                    y: this.getRandomPosition(settings.world.HEIGHT),
-                });
-            }
-        }, settings.SPAWN_BODYPART_TIMER);
     }
 
     getRandomPosition(dimension) {
