@@ -10,10 +10,9 @@ const PUBLIC_FOLDER = process.env.PUBLIC_FOLDER || '/';
 
 const settings = {
     BACKGROUND_COLOR: '#000000',
-    GRID_SIZE: 20,
+    GRID_SIZE: 50,
     PLAYER_MOVE_TIMER: 40,
     GAME_LOOP_TIMER: 100,
-    SPAWN_FRUIT_TIMER: 100,
     world: {
         WIDTH: 800,
         HEIGHT: 500
@@ -60,6 +59,13 @@ class GameObject {
         return this._y;
     }
 
+    get position() {
+        return {
+            x: this.x,
+            y: this.y,
+        }
+    }
+
     set x(newX) {
         this._x = newX;
     }
@@ -69,8 +75,10 @@ class GameObject {
     }
 }
 
-class Fruit extends GameObject {}
-class BodyPart extends GameObject {}
+class Fruit extends GameObject {
+}
+class BodyPart extends GameObject {
+}
 
 class Player {
 
@@ -92,6 +100,10 @@ class Player {
         this._direction = newDirection;
     }
 
+    get head() {
+        return this._bodyParts[0];
+    }
+
     expandBody(position) {
         const newBodyPart = new BodyPart(position);
 
@@ -99,12 +111,12 @@ class Player {
     }
 
     move() {
-        const head = this._bodyParts[0];
+        const head = this.head;
 
-        if (head.x <= 0 ||
-            head.y <= 0 ||
-            head.x >= settings.world.WIDTH - settings.GRID_SIZE ||
-            head.y >= settings.world.HEIGHT - settings.GRID_SIZE) {
+        if (head.x <= 0 - settings.GRID_SIZE ||
+            head.y <= 0 - settings.GRID_SIZE ||
+            head.x >= settings.world.WIDTH ||
+            head.y >= settings.world.HEIGHT) {
             return;
         }
 
@@ -133,10 +145,12 @@ class Player {
 class Game {
 
     constructor(postGameLoopCallback) {
+        this._grid = new Map();
         this._players = new Map();
         this._fruits = new Map();
-
         this._postGameLoopCallback = postGameLoopCallback;
+
+        this._createFruit();
 
         this._startGameLoop();
     }
@@ -149,25 +163,48 @@ class Game {
         return this._fruits;
     }
 
+    _occupySquare(key, gameObject) {
+        this._grid.set(key, gameObject);
+    }
+
+    _createFruit() {
+        const position = {
+            x: this.getRandomPosition(settings.world.WIDTH),
+            y: this.getRandomPosition(settings.world.HEIGHT),
+        };
+        const fruit = new Fruit(position);
+        this._fruits.set(fruit.id, fruit);
+
+        this._occupySquare(generateGridKey(fruit.position), fruit);
+    }
+
+    _movePlayers() {
+        for (const player of this._players.values()) {
+            player.move();
+        }
+    }
+
+    _detectCollisions() {
+        // Player to fruit collision
+        for (const player of this._players.values()) {
+            const gridKey = generateGridKey(player.head.position),
+                objectOnSquare = this._grid.get(gridKey);
+
+            if (objectOnSquare) {
+                this.removeFruit(objectOnSquare.id);
+                this._grid.delete(gridKey);
+                this._createFruit();
+            }
+        }
+    }
+
     _startGameLoop() {
         setInterval(() => {
-            for (const player of this._players.values()) {
-                player.move();
-            }
+            this._movePlayers();
+            this._detectCollisions();
 
             this._postGameLoopCallback();
         }, settings.GAME_LOOP_TIMER);
-
-        // setInterval(() => {
-        //     const position = {
-        //         x: this.getRandomPosition(settings.world.WIDTH),
-        //         y: this.getRandomPosition(settings.world.HEIGHT),
-        //     };
-        //     const fruit = new Fruit(position);
-        //     this._fruits.set(fruit.id, fruit);
-
-        // }, settings.SPAWN_FRUIT_TIMER);
-
     }
 
     getRandomPosition(dimension) {
@@ -191,6 +228,14 @@ class Game {
     removePlayer(id) {
         this._players.delete(id);
     }
+
+    removeFruit(id) {
+        this._fruits.delete(id);
+    }
+}
+
+function generateGridKey(position) {
+    return `${position.x}-${position.y}`;
 }
 
 function onConnection(socket) {
@@ -224,8 +269,6 @@ function onDisconnection(socket) {
 }
 
 function onPlayerAction(player, action) {
-    console.log(player, action);
-
     player.direction = action;
 }
 
@@ -234,6 +277,11 @@ function onGameLoopFinished() {
 }
 
 function emitGameState() {
+    console.log({
+        players: [...game.players],
+        fruits: [...game.fruits],
+    });
+
     io.emit(settings.messages.GAME_STATE, {
         players: [...game.players],
         fruits: [...game.fruits],
@@ -248,6 +296,6 @@ app.use(express.static(path.join(__dirname, PUBLIC_FOLDER)));
 
 server.listen(PORT);
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname, PUBLIC_FOLDER, 'index.html'));
 });

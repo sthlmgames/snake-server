@@ -105,3 +105,9 @@ fabric.properties
 # *.ipr
 
 # End of https://www.gitignore.io/api/node,webstorm
+.idea/jsLibraryMappings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/snake-server.iml
+.idea/vcs.xml
+.idea/watcherTasks.xml
