@@ -194,6 +194,7 @@ class Game {
                 this.removeFruit(objectOnSquare.id);
                 this._grid.delete(gridKey);
                 this._createFruit();
+                player.expandBody(player.head.position);
             }
         }
     }
