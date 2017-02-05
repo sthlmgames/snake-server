@@ -4,16 +4,13 @@ const Fruit = require('./Fruit');
 
 class Game {
 
-    constructor(settings, postGameLoopCallback) {
+    constructor(settings) {
         this._settings = settings;
         this._grid = new Map();
         this._players = new Map();
         this._fruits = new Map();
-        this._postGameLoopCallback = postGameLoopCallback;
 
         this._createFruit();
-
-        this._startGameLoop();
     }
 
     get settings() {
@@ -64,12 +61,12 @@ class Game {
         }
     }
 
-    _startGameLoop() {
+    startGameLoop(postGameLoopCallback) {
         setInterval(() => {
             this._movePlayers();
             this._detectCollisions();
 
-            this._postGameLoopCallback();
+            postGameLoopCallback();
         }, this._settings.GAME_LOOP_TIMER);
     }
 
