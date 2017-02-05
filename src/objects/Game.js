@@ -20,6 +20,10 @@ class Game {
         return this._settings;
     }
 
+    get grid() {
+        return this._grid;
+    }
+
     get players() {
         return this._players;
     }
@@ -45,7 +49,9 @@ class Game {
 
     _movePlayers() {
         for (const player of this._players.values()) {
-            player.move();
+            if (player.allowedToMove) {
+                player.move();
+            }
         }
     }
 
@@ -54,6 +60,13 @@ class Game {
     }
 
     _detectCollisions() {
+        // Player to world bounds collision
+        for (const player of this._players.values()) {
+            const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
+
+            player.allowedToMove = !collision;
+        }
+
         // Player to fruit collision
         for (const player of this._players.values()) {
             const collision = this._collisionHandler.playerWithGameObjectCollision(player),
@@ -74,8 +87,8 @@ class Game {
 
     startGameLoop(postGameLoopCallback) {
         setInterval(() => {
-            this._movePlayers();
             this._detectCollisions();
+            this._movePlayers();
 
             postGameLoopCallback();
         }, this._settings.GAME_LOOP_TIMER);
@@ -86,7 +99,7 @@ class Game {
             x: helper.getRandomPosition(this._settings.world.WIDTH),
             y: helper.getRandomPosition(this._settings.world.HEIGHT),
         };
-        const player = new Player(this, id, position);
+        const player = new Player(this, id, position, true);
 
         this._players.set(id, player);
     }

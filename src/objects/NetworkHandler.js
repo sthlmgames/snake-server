@@ -44,10 +44,12 @@ class NetworkHandler {
     }
 
     _emitGameState() {
-        this._io.emit(settings.messages.GAME_STATE, {
+        const gameState = {
             players: [...this._game.players],
             fruits: [...this._game.fruits],
-        });
+        };
+
+        this._io.emit(settings.messages.GAME_STATE, gameState);
     }
 
     onGameLoopFinished() {

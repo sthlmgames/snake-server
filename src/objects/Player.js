@@ -2,11 +2,12 @@ const BodyPart = require('./BodyPart');
 
 class Player {
 
-    constructor(game, id, position) {
+    constructor(game, id, position, allowedToMove) {
         this._game = game;
         this._id = id;
         this._bodyParts = [];
         this._direction = null;
+        this._allowedToMove = allowedToMove;
 
         this.expandBody(position);
         this.expandBody(position);
@@ -21,6 +22,14 @@ class Player {
         this._direction = newDirection;
     }
 
+    get allowedToMove() {
+        return this._allowedToMove;
+    }
+
+    set allowedToMove(allowed) {
+        this._allowedToMove = allowed;
+    }
+
     get head() {
         return this._bodyParts[0];
     }
@@ -32,16 +41,8 @@ class Player {
     }
 
     move() {
-        const head = this.head;
-
-        if (head.x <= 0 - this._game.settings.GRID_SIZE ||
-            head.y <= 0 - this._game.settings.GRID_SIZE ||
-            head.x >= this._game.settings.world.WIDTH ||
-            head.y >= this._game.settings.world.HEIGHT) {
-            return;
-        }
-
-        const tail = this._bodyParts.pop();
+        const head = this.head,
+            tail = this._bodyParts.pop();
 
         let newHeadX = head.x,
             newHeadY = head.y;
