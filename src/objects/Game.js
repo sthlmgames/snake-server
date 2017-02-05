@@ -1,6 +1,7 @@
 const helper = require('../utils/helper');
 const Player = require('./Player');
 const Fruit = require('./Fruit');
+const CollisionHandler = require('./CollisionHandler');
 
 class Game {
 
@@ -9,6 +10,8 @@ class Game {
         this._grid = new Map();
         this._players = new Map();
         this._fruits = new Map();
+
+        this._collisionHandler = new CollisionHandler(this._grid);
 
         this._createFruit();
     }
@@ -46,19 +49,27 @@ class Game {
         }
     }
 
+    _removeObjectFromGrid(gridKey) {
+        this._grid.delete(gridKey);
+    }
+
     _detectCollisions() {
         // Player to fruit collision
         for (const player of this._players.values()) {
-            const gridKey = helper.generateGridKey(player.head.position),
-                objectOnSquare = this._grid.get(gridKey);
+            const collision = this._collisionHandler.playerWithGameObjectCollision(player),
+                object = collision.object;
 
-            if (objectOnSquare) {
-                this.removeFruit(objectOnSquare.id);
-                this._grid.delete(gridKey);
+            if (object && object instanceof Fruit) {
+                this._removeFruit(object.id);
+                this._removeObjectFromGrid(collision.gridKey);
                 this._createFruit();
                 player.expandBody(player.head.position);
             }
         }
+    }
+
+    _removeFruit(id) {
+        this._fruits.delete(id);
     }
 
     startGameLoop(postGameLoopCallback) {
@@ -82,10 +93,6 @@ class Game {
 
     removePlayer(id) {
         this._players.delete(id);
-    }
-
-    removeFruit(id) {
-        this._fruits.delete(id);
     }
 }
 
