@@ -1,7 +1,6 @@
 const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 50,
-    PLAYER_MOVE_TIMER: 40,
     GAME_LOOP_TIMER: 100,
     world: {
         WIDTH: 800,
