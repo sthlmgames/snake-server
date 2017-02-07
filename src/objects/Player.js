@@ -50,34 +50,49 @@ class Player {
         return this.head.x === this._game.settings.world.WIDTH - this._game.settings.GRID_SIZE;
     }
 
-    _getNextPosition(head) {
-        let newHeadX = head.x,
-            newHeadY = head.y;
-
-        if (this.headIsAgainstTopBounds && this.direction === this._game.settings.playerActions.directions.UP) {
-            newHeadY = this._game.settings.world.HEIGHT - this._game.settings.GRID_SIZE;
-        } else if (this.headIsAgainstBottomBounds && this.direction === this._game.settings.playerActions.directions.DOWN) {
-            newHeadY = 0;
-        } else if (this.headIsAgainstLeftBounds && this.direction === this._game.settings.playerActions.directions.LEFT) {
-            newHeadX = this._game.settings.world.WIDTH - this._game.settings.GRID_SIZE;
-        } else if (this.headIsAgainstRightBounds && this.direction === this._game.settings.playerActions.directions.RIGHT) {
-            newHeadX = 0;
-        } else {
-            if (this._direction === this._game.settings.playerActions.directions.UP) {
-                newHeadY += -this._game.settings.GRID_SIZE;
-            } else if (this._direction === this._game.settings.playerActions.directions.DOWN) {
-                newHeadY += this._game.settings.GRID_SIZE;
-            } else if (this._direction === this._game.settings.playerActions.directions.LEFT) {
-                newHeadX += -this._game.settings.GRID_SIZE;
-            } else if (this._direction === this._game.settings.playerActions.directions.RIGHT) {
-                newHeadX += this._game.settings.GRID_SIZE;
-            }
+    _handleMoveWithinWorldBounds(nextPosition) {
+        if (this._direction === this._game.settings.playerActions.directions.UP) {
+            nextPosition.y += -this._game.settings.GRID_SIZE;
+        } else if (this._direction === this._game.settings.playerActions.directions.DOWN) {
+            nextPosition.y += this._game.settings.GRID_SIZE;
+        } else if (this._direction === this._game.settings.playerActions.directions.LEFT) {
+            nextPosition.x += -this._game.settings.GRID_SIZE;
+        } else if (this._direction === this._game.settings.playerActions.directions.RIGHT) {
+            nextPosition.x += this._game.settings.GRID_SIZE;
         }
 
-        return {
-            x: newHeadX,
-            y: newHeadY,
+        return nextPosition;
+    }
+
+    _handleFreeMovement(nextPosition) {
+        if (this.headIsAgainstTopBounds && this.direction === this._game.settings.playerActions.directions.UP) {
+            nextPosition.y = this._game.settings.world.HEIGHT - this._game.settings.GRID_SIZE;
+        } else if (this.headIsAgainstBottomBounds && this.direction === this._game.settings.playerActions.directions.DOWN) {
+            nextPosition.y = 0;
+        } else if (this.headIsAgainstLeftBounds && this.direction === this._game.settings.playerActions.directions.LEFT) {
+            nextPosition.x = this._game.settings.world.WIDTH - this._game.settings.GRID_SIZE;
+        } else if (this.headIsAgainstRightBounds && this.direction === this._game.settings.playerActions.directions.RIGHT) {
+            nextPosition.x = 0;
+        } else {
+            nextPosition = this._handleMoveWithinWorldBounds(nextPosition);
+        }
+
+        return nextPosition;
+    }
+
+    _getNextPosition(head) {
+        let nextPosition = {
+            x: head.x,
+            y: head.y,
         };
+
+        if (this._game.settings.mode === this._game.settings.modes.FREE_MOVEMENT) {
+            nextPosition = this._handleFreeMovement(nextPosition);
+        } else if (this._game.settings.mode === this._game.settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
+            nextPosition = this._handleMoveWithinWorldBounds(nextPosition);
+        }
+
+        return nextPosition;
     }
 
     expandBody(position) {
