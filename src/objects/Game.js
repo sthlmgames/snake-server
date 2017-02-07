@@ -13,7 +13,7 @@ class Game {
 
         this._collisionHandler = new CollisionHandler(this._grid);
 
-        this._createFruit();
+        // this._createFruit();
     }
 
     get settings() {
@@ -32,19 +32,15 @@ class Game {
         return this._fruits;
     }
 
-    _occupySquare(key, gameObject) {
-        this._grid.set(key, gameObject);
-    }
-
     _createFruit() {
         const position = {
             x: helper.getRandomPosition(this._settings.world.WIDTH),
             y: helper.getRandomPosition(this._settings.world.HEIGHT),
-        };
-        const fruit = new Fruit(this, position);
-        this._fruits.set(fruit.id, fruit);
+        },
+        fruit = new Fruit(this, position);
 
-        this._occupySquare(helper.generateGridKey(fruit.position), fruit);
+        this._fruits.set(fruit.id, fruit);
+        this.occupyGridSquare(helper.generateGridKey(fruit.position), fruit);
     }
 
     _movePlayers() {
@@ -53,10 +49,6 @@ class Game {
                 player.move();
             }
         }
-    }
-
-    _removeObjectFromGrid(gridKey) {
-        this._grid.delete(gridKey);
     }
 
     _detectCollisions() {
@@ -76,7 +68,7 @@ class Game {
 
             if (object && object instanceof Fruit) {
                 this._removeFruit(object.id);
-                this._removeObjectFromGrid(collision.gridKey);
+                this.removeObjectFromGrid(collision.gridKey);
                 this._createFruit();
                 player.expandBody(player.head.position);
             }
@@ -85,6 +77,14 @@ class Game {
 
     _removeFruit(id) {
         this._fruits.delete(id);
+    }
+
+    occupyGridSquare(key, gameObject) {
+        this._grid.set(key, gameObject);
+    }
+
+    removeObjectFromGrid(key) {
+        this._grid.delete(key);
     }
 
     startGameLoop(postGameLoopCallback) {
