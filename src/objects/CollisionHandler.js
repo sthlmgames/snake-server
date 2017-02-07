@@ -18,12 +18,11 @@ class CollisionHandler {
     }
 
     playerWithWorldBoundsCollision(player) {
-        const head = player.head,
-            collision =
-                (head.x <= 0 ||
-                head.y <= 0 ||
-                head.x >= settings.world.WIDTH - settings.GRID_SIZE ||
-                head.y >= settings.world.HEIGHT - settings.GRID_SIZE);
+        const collision =
+                player.headIsAgainstTopBounds && player.direction === settings.playerActions.directions.UP ||
+                player.headIsAgainstBottomBounds && player.direction === settings.playerActions.directions.DOWN ||
+                player.headIsAgainstLeftBounds && player.direction === settings.playerActions.directions.LEFT ||
+                player.headIsAgainstRightBounds && player.direction === settings.playerActions.directions.RIGHT;
 
             return collision;
     }

@@ -60,11 +60,13 @@ class Game {
     }
 
     _detectCollisions() {
-        // Player to world bounds collision
-        for (const player of this._players.values()) {
-            const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
+        if (this._settings.mode === this._settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
+            // Player to world bounds collision
+            for (const player of this._players.values()) {
+                const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
 
-            player.allowedToMove = !collision;
+                player.allowedToMove = !collision;
+            }
         }
 
         // Player to fruit collision
