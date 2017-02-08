@@ -1,7 +1,7 @@
 const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 50,
-    GAME_LOOP_TIMER: 1000,
+    GAME_LOOP_TIMER: 100,
     modes: {
         FREE_MOVEMENT: 'free-movement',
         BLOCKED_BY_WORLD_BOUNDS: 'blocked-by-world-bounds',

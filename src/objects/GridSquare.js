@@ -9,6 +9,10 @@ class GridSquare {
         return this._gameObjects.size;
     }
 
+    get gameObjects() {
+        return this._gameObjects.values();
+    }
+
     addGameObject(gameObject) {
         this._gameObjects.set(gameObject.id, gameObject);
     }

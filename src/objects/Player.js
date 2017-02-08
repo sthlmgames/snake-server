@@ -1,14 +1,14 @@
-const helper = require('../utils/helper');
 const BodyPart = require('./BodyPart');
 
 class Player {
 
-    constructor(game, id, position, allowedToMove) {
+    constructor(game, id, position, allowedToMove, gridHandler) {
         this._game = game;
         this._id = id;
         this._bodyParts = [];
         this._direction = null;
         this._allowedToMove = allowedToMove;
+        this._gridHandler = gridHandler;
 
         this.expandBody(position);
         this.expandBody(position);
@@ -101,25 +101,21 @@ class Player {
 
         this._bodyParts.push(newBodyPart);
 
-        this._game.occupyGridSquare(newBodyPart);
+        this._gridHandler.occupyGridSquare(newBodyPart);
     }
 
     move() {
         const tail = this._bodyParts.pop(),
             nextPosition = this._getNextPosition(this.head);
 
-        // TODO make code more clear
-        //let tailKey = helper.generateGridKey(tail.position);
-
-        this._game.removeObjectFromGrid(tail);
+        this._gridHandler.removeObjectFromGrid(tail);
 
         this._bodyParts.unshift(tail);
 
         tail.x = nextPosition.x;
         tail.y = nextPosition.y;
 
-        //tailKey = helper.generateGridKey(tail.position);
-        this._game.occupyGridSquare(tail);
+        this._gridHandler.occupyGridSquare(tail);
     }
 }
 
