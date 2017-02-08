@@ -1,6 +1,7 @@
 const helper = require('../utils/helper');
 const Player = require('./Player');
 const Fruit = require('./Fruit');
+const GridSquare = require('./GridSquare');
 const CollisionHandler = require('./CollisionHandler');
 
 class Game {
@@ -14,6 +15,7 @@ class Game {
         this._collisionHandler = new CollisionHandler(this._grid);
 
         // this._createFruit();
+        this._initializeGrid();
     }
 
     get settings() {
@@ -30,6 +32,21 @@ class Game {
 
     get fruits() {
         return this._fruits;
+    }
+
+    _initializeGrid() {
+        const gridSize = this._settings.GRID_SIZE;
+
+        for (let x = 0; x <= this._settings.world.WIDTH; x = x + gridSize) {
+            for (let y = 0; y <= this._settings.world.HEIGHT; y = y + gridSize) {
+                const key = helper.generateGridKey({
+                    x: x,
+                    y: y,
+                });
+
+                this._grid.set(key, new GridSquare(key));
+            }
+        }
     }
 
     _createFruit() {
@@ -79,12 +96,18 @@ class Game {
         this._fruits.delete(id);
     }
 
-    occupyGridSquare(key, gameObject) {
-        this._grid.set(key, gameObject);
+    occupyGridSquare(gameObject) {
+        const key = helper.generateGridKey(gameObject.position),
+            gridSquare = this._grid.get(key);
+
+        gridSquare.addGameObject(gameObject);
     }
 
-    removeObjectFromGrid(key) {
-        this._grid.delete(key);
+    removeObjectFromGrid(gameObject) {
+        const key = helper.generateGridKey(gameObject.position),
+            gridSquare = this._grid.get(key);
+
+        gridSquare.removeGameObject(gameObject);
     }
 
     startGameLoop(postGameLoopCallback) {

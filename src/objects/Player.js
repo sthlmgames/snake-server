@@ -101,24 +101,25 @@ class Player {
 
         this._bodyParts.push(newBodyPart);
 
-        this._game.occupyGridSquare(helper.generateGridKey(newBodyPart.position), newBodyPart);
+        this._game.occupyGridSquare(newBodyPart);
     }
 
     move() {
         const tail = this._bodyParts.pop(),
             nextPosition = this._getNextPosition(this.head);
 
-        let tailKey = helper.generateGridKey(tail.position);
+        // TODO make code more clear
+        //let tailKey = helper.generateGridKey(tail.position);
 
-        this._game.removeObjectFromGrid(tailKey);
+        this._game.removeObjectFromGrid(tail);
 
         this._bodyParts.unshift(tail);
 
         tail.x = nextPosition.x;
         tail.y = nextPosition.y;
 
-        tailKey = helper.generateGridKey(tail.position);
-        this._game.occupyGridSquare(helper.generateGridKey(tail.position), tail);
+        //tailKey = helper.generateGridKey(tail.position);
+        this._game.occupyGridSquare(tail);
     }
 }
 
