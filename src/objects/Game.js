@@ -28,11 +28,8 @@ class Game {
     }
 
     _createFruit() {
-        const position = {
-            x: this._gridHandler.getRandomGridPosition(this._settings.world.WIDTH),
-            y: this._gridHandler.getRandomGridPosition(this._settings.world.HEIGHT),
-        },
-        fruit = new Fruit(this, position);
+        const position = this._gridHandler.randomGridPosition,
+            fruit = new Fruit(this, position);
 
         this._fruits.set(fruit.id, fruit);
         this._gridHandler.occupyGridSquare(fruit);
@@ -85,11 +82,8 @@ class Game {
     }
 
     addPlayer(id) {
-        const position = {
-            x: this._gridHandler.getRandomGridPosition(this._settings.world.WIDTH),
-            y: this._gridHandler.getRandomGridPosition(this._settings.world.HEIGHT),
-        };
-        const player = new Player(this, id, position, true, this._gridHandler);
+        const position = this._gridHandler.randomGridPosition,
+            player = new Player(this, id, position, true, this._gridHandler);
 
         this._players.set(id, player);
     }

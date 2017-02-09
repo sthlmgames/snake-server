@@ -9,17 +9,40 @@ class GridHandler {
         this._initializeGrid();
     }
 
+    get freeGridSquares() {
+        const freeGridSquares = [];
+
+        for (const gridSquare of this._grid.values()) {
+            if (!gridSquare.occupied) {
+                freeGridSquares.push(gridSquare);
+            }
+        }
+
+        return freeGridSquares;
+    }
+
+    get randomGridPosition() {
+        const freeGridSquares = this.freeGridSquares,
+            randomIndex = Math.floor(Math.random() * freeGridSquares.length),
+            randomGridSquare = freeGridSquares[randomIndex];
+
+        console.log(randomIndex, freeGridSquares.length, this._grid.size);
+
+        return randomGridSquare.location;
+    }
+
     _initializeGrid() {
         const gridSize = settings.GRID_SIZE;
 
-        for (let x = 0; x <= settings.world.WIDTH; x = x + gridSize) {
-            for (let y = 0; y <= settings.world.HEIGHT; y = y + gridSize) {
-                const key = this.generateGridKey({
-                    x: x,
-                    y: y,
-                });
+        for (let x = 0; x <= settings.world.WIDTH - gridSize; x = x + gridSize) {
+            for (let y = 0; y <= settings.world.HEIGHT - gridSize; y = y + gridSize) {
+                const location = {
+                        x: x,
+                        y: y,
+                    },
+                    key = this.generateGridKey(location);
 
-                this._grid.set(key, new GridSquare(key));
+                this._grid.set(key, new GridSquare(key, location));
             }
         }
     }
@@ -41,14 +64,6 @@ class GridHandler {
         const gridSquare = this.getGridSquare(gameObject.position);
 
         gridSquare.removeGameObject(gameObject);
-    }
-
-    getRandomGridPosition(dimension) {
-        const maxValue = dimension - settings.GRID_SIZE,
-            randomValue = Math.round(Math.random() * maxValue),
-            result = Math.round(randomValue / settings.GRID_SIZE) * settings.GRID_SIZE;
-
-        return result;
     }
 
     generateGridKey(position) {
