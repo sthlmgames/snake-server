@@ -10,13 +10,8 @@ class GridHandler {
     }
 
     get freeGridSquares() {
-        const freeGridSquares = [];
-
-        for (const gridSquare of this._grid.values()) {
-            if (!gridSquare.occupied) {
-                freeGridSquares.push(gridSquare);
-            }
-        }
+        const gridSquares = Array.from(this._grid.values()),
+            freeGridSquares = gridSquares.filter(gridSquare => !gridSquare.occupied);
 
         return freeGridSquares;
     }
@@ -25,8 +20,6 @@ class GridHandler {
         const freeGridSquares = this.freeGridSquares,
             randomIndex = Math.floor(Math.random() * freeGridSquares.length),
             randomGridSquare = freeGridSquares[randomIndex];
-
-        console.log(randomIndex, freeGridSquares.length, this._grid.size);
 
         return randomGridSquare.location;
     }
