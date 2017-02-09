@@ -25,7 +25,7 @@ class GameObject {
         return {
             x: this.x,
             y: this.y,
-        }
+        };
     }
 
     set x(newX) {
