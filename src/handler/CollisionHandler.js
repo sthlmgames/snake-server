@@ -1,20 +1,16 @@
 const settings = require('../utils/settings');
-const helper = require('../utils/helper');
 
 class CollisionHandler {
 
-    constructor(grid) {
-        this._grid = grid;
+    constructor(gridHandler) {
+        this._gridHandler = gridHandler;
     }
 
     playerWithGameObjectCollision(player) {
-        const gridKey = helper.generateGridKey(player.head.position),
-            objectOnSquare = this._grid.get(gridKey);
+        const gridSquare = this._gridHandler.getGridSquare(player.head.position),
+            collision = gridSquare.occupied && gridSquare.gameObjects;
 
-        return {
-            object: objectOnSquare,
-            gridKey: gridKey,
-        };
+        return collision;
     }
 
     playerWithWorldBoundsCollision(player) {
