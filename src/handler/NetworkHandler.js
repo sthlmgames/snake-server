@@ -40,7 +40,13 @@ class NetworkHandler {
     }
 
     _onPlayerAction(player, action) {
-        player.direction = action;
+        const playerDisallowed = (player.direction === settings.playerActions.directions[action.value].disallowed);
+
+        if (playerDisallowed) {
+            return;
+        }
+
+        player.direction = action.value;
     }
 
     _emitGameState() {
