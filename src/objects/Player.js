@@ -4,8 +4,7 @@ const PlayerColor = require('./PlayerColor');
 
 class Player {
 
-    constructor(game, id, position, color, allowedToMove, gridHandler) {
-        this._game = game;
+    constructor(id, position, color, allowedToMove, gridHandler) {
         this._id = id;
         this._color = color;
         this._bodyParts = [];
@@ -104,7 +103,7 @@ class Player {
     }
 
     expandBody(position) {
-        const newBodyPart = new BodyPart(this._game, position);
+        const newBodyPart = new BodyPart(position);
 
         this._bodyParts.push(newBodyPart);
 

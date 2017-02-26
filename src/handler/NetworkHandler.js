@@ -1,10 +1,13 @@
+const EventEmitter = require('events').EventEmitter;
+
 const settings = require('../utils/settings');
 
-class NetworkHandler {
+class NetworkHandler extends EventEmitter {
 
-    constructor(io, game) {
+    constructor(io) {
+        super();
+
         this._io = io;
-        this._game = game;
 
         this._io.on(settings.messages.CONNECT, this._onConnection.bind(this));
     }
@@ -12,55 +15,46 @@ class NetworkHandler {
     _onConnection(socket) {
         console.log('connected: ', socket.id);
 
-        this._game.addPlayer(socket.id);
+        this.emit(NetworkHandler.events.CONNECT, socket.id);
 
         socket.emit(settings.messages.YOU_CONNECTED, {
             id: socket.id,
             settings: settings,
         });
 
-        if (this._game.players.size === 1) {
-            this._io.emit(settings.messages.GAME_STARTED);
-        }
-
-        this._emitGameState();
-
         socket.on(settings.messages.DISCONNECT, () => {
             this._onDisconnection(socket);
         });
 
-        socket.on(settings.messages.PLAYER_ACTION, (payload) => {
-            this._onPlayerAction(this._game.players.get(socket.id), payload);
+        socket.on(settings.messages.PLAYER_ACTION, payload => {
+            this._onPlayerAction(socket, payload);
         });
     }
 
     _onDisconnection(socket) {
-        this._game.removePlayer(socket.id);
-        this._emitGameState();
+        this.emit(NetworkHandler.events.DISCONNECT, socket.id);
     }
 
-    _onPlayerAction(player, action) {
-        const playerDisallowed = (player.direction === settings.playerActions.directions[action.value].disallowed);
-
-        if (playerDisallowed) {
-            return;
-        }
-
-        player.direction = action.value;
+    _onPlayerAction(socket, payload) {
+        this.emit(NetworkHandler.events.PLAYER_ACTION, {
+            id: socket.id,
+            action: payload,
+        });
     }
 
-    _emitGameState() {
-        const gameState = {
-            players: [...this._game.players],
-            fruits: [...this._game.fruits],
-        };
+    emitGameStarted() {
+        this._io.emit(settings.messages.GAME_STARTED);
+    }
 
+    emitGameState(gameState) {
         this._io.emit(settings.messages.GAME_STATE, gameState);
     }
-
-    onGameLoopFinished() {
-        this._emitGameState();
-    }
 }
+
+NetworkHandler.events = {
+    CONNECT: 'on-connection',
+    DISCONNECT: 'on-disconnection',
+    PLAYER_ACTION: 'on-player-action',
+};
 
 module.exports = NetworkHandler;
