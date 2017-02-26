@@ -1,10 +1,10 @@
+const settings = require('../utils/settings');
 const Player = require('./Player');
 const Fruit = require('./Fruit');
 
 class Game {
 
-    constructor(settings, gridHandler, collisionHandler) {
-        this._settings = settings;
+    constructor(gridHandler, collisionHandler) {
         this._grid = new Map();
         this._players = new Map();
         this._fruits = new Map();
@@ -13,10 +13,6 @@ class Game {
         this._collisionHandler = collisionHandler;
 
         this._createFruit();
-    }
-
-    get settings() {
-        return this._settings;
     }
 
     get players() {
@@ -45,7 +41,7 @@ class Game {
 
     _detectCollisions() {
         // Player to world bounds collision
-        if (this._settings.mode === this._settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
+        if (settings.mode === settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
             for (const player of this._players.values()) {
                 const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
 
@@ -78,7 +74,7 @@ class Game {
             this._detectCollisions();
 
             postGameLoopCallback();
-        }, this._settings.GAME_LOOP_TIMER);
+        }, settings.GAME_LOOP_TIMER);
     }
 
     addPlayer(id) {
