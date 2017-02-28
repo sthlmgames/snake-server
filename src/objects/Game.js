@@ -2,6 +2,7 @@ const settings = require('../utils/settings');
 const NetworkHandler = require('../handler/NetworkHandler');
 const Player = require('./Player');
 const Fruit = require('./Fruit');
+const ChangeDirectionCommand = require('../actions/ChangeDirectionCommand');
 
 class Game {
 
@@ -57,13 +58,9 @@ class Game {
         console.log('_onPlayerAction', payload.id);
 
         const player = this._players.get(payload.id),
-            playerDisallowed = (player.direction === settings.playerActions.directions[payload.action.value].disallowed);
+            command = new ChangeDirectionCommand(player, payload.action.value);
 
-        if (playerDisallowed) {
-            return;
-        }
-
-        player.direction = payload.action.value;
+        command.execute();
     }
 
     _addPlayer(id) {
