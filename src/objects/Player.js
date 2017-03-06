@@ -1,10 +1,12 @@
 const BodyPart = require('./BodyPart');
+const PlayerColor = require('./PlayerColor');
 
 class Player {
 
-    constructor(game, id, position, allowedToMove, gridHandler) {
+    constructor(game, id, position, color, allowedToMove, gridHandler) {
         this._game = game;
         this._id = id;
+        this._color = color;
         this._bodyParts = [];
         this._direction = game.settings.playerActions.directions.RIGHT.value;
         this._allowedToMove = allowedToMove;
@@ -13,6 +15,10 @@ class Player {
         this.expandBody(position);
         this.expandBody(position);
         this.expandBody(position);
+    }
+
+    get color() {
+        return this._color;
     }
 
     get direction() {
@@ -118,5 +124,12 @@ class Player {
         this._gridHandler.occupyGridSquare(tail);
     }
 }
+
+Player.colors = [
+    new PlayerColor('#FF0000'), // Red
+    new PlayerColor('#0000FF'), // Blue
+    new PlayerColor('#00FF00'), // Green
+    new PlayerColor('#FFFF00'), // Yellow
+];
 
 module.exports = Player;

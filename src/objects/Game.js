@@ -83,12 +83,20 @@ class Game {
 
     addPlayer(id) {
         const position = this._gridHandler.randomGridPosition,
-            player = new Player(this, id, position, true, this._gridHandler);
+            freeColors = Player.colors.filter(color => !color.occupied),
+            randomColor = freeColors[Math.floor(Math.random() * freeColors.length)],
+            player = new Player(this, id, position, randomColor, true, this._gridHandler);
+        
+        randomColor.occupied = true;
 
         this._players.set(id, player);
     }
 
     removePlayer(id) {
+        const player = this._players.get(id);
+
+        player.color.occupied = false;
+
         this._players.delete(id);
     }
 }
