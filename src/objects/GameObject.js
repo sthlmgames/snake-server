@@ -34,6 +34,13 @@ class GameObject {
     set y(newY) {
         this._y = newY;
     }
+
+    get serialized() {
+        return {
+            id: this._id,
+            position: this.position,
+        };
+    }
 }
 
 module.exports = GameObject;

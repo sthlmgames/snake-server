@@ -2,7 +2,7 @@ const settings = require('../utils/settings');
 const NetworkHandler = require('../handler/NetworkHandler');
 const Player = require('./Player');
 const Fruit = require('./Fruit');
-const ChangeDirectionCommand = require('../actions/ChangeDirectionCommand');
+const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
 
 class Game {
 
@@ -23,9 +23,11 @@ class Game {
 
     get state() {
         const state = {
-            players: [...this._players],
-            fruits: [...this._fruits],
+            players: Array.from(this._players.values()).map(player => player.serialized),
+            fruits: Array.from(this._fruits.values()).map(fruit => fruit.serialized),
         };
+
+        console.log(Array.from(this._players.values()).map(player => player.serialized));
 
         return state;
     }
@@ -57,8 +59,17 @@ class Game {
     _onPlayerAction(payload) {
         console.log('_onPlayerAction', payload.id);
 
-        const player = this._players.get(payload.id),
-            command = new ChangeDirectionCommand(player, payload.action.value);
+        const player = this._players.get(payload.id);
+
+        let command;
+
+        switch (payload.action.type) {
+            case settings.playerActions.DIRECTION_ACTION:
+                command = new ChangeDirectionAction(player, payload.action);
+                break;
+            default:
+                console.log('Unknown player action...');
+        }
 
         command.execute();
     }

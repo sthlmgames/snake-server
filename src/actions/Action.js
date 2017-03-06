@@ -1,7 +1,7 @@
 const settings = require('../utils/settings');
 const GridSquare = require('../objects/GridSquare');
 
-class Command {
+class Action {
 
     constructor() {
 
@@ -12,4 +12,4 @@ class Command {
     }
 }
 
-module.exports = Command;
+module.exports = Action;
