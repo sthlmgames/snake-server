@@ -2,8 +2,7 @@ const uuid = require('uuid/v4');
 
 class GameObject {
 
-    constructor(game, position) {
-        this._game = game;
+    constructor(position) {
         this._id = uuid();
         this._x = position.x;
         this._y = position.y;

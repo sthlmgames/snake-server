@@ -2,8 +2,8 @@ const GameObject = require('./GameObject');
 
 class BodyPart extends GameObject {
 
-    constructor(game, position) {
-        super(game, position);
+    constructor(position) {
+        super(position);
     }
 }
 

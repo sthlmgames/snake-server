@@ -2,8 +2,8 @@ const GameObject = require('./GameObject');
 
 class Fruit extends GameObject {
 
-    constructor(game, position) {
-        super(game, position);
+    constructor(position) {
+        super(position);
     }
 }
 

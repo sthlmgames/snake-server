@@ -7,22 +7,22 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const PUBLIC_FOLDER = process.env.PUBLIC_FOLDER || '/';
 
-const settings = require('./utils/settings');
-
 const NetworkHandler = require('./handler/NetworkHandler');
 const GridHandler = require('./handler/GridHandler');
 const CollisionHandler = require('./handler/CollisionHandler');
 
 const Game = require('./objects/Game');
 
+const networkHandler = new NetworkHandler(io);
 const gridHandler = new GridHandler();
 const collisionHandler = new CollisionHandler(gridHandler);
 
-const game = new Game(settings, gridHandler, collisionHandler);
+const game = new Game(gridHandler, collisionHandler, networkHandler);
 
-// TODO should this object know about Game? broadcast events instead?
-const networkHandler = new NetworkHandler(io, game);
+game.startGameLoop();
 
+
+// Necessary server stuff below
 app.use(express.static(path.join(__dirname, PUBLIC_FOLDER)));
 
 server.listen(PORT);
@@ -31,5 +31,4 @@ app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname, PUBLIC_FOLDER, 'index.html'));
 });
 
-game.startGameLoop(networkHandler.onGameLoopFinished.bind(networkHandler));
 
