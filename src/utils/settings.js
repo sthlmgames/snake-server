@@ -1,3 +1,5 @@
+const DIRECTION_ACTION = 'direction-action';
+
 const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 50,
@@ -12,19 +14,22 @@ const settings = {
     },
 
     playerActions: {
-        directions: {
-            UP: {
-                value: 'UP',
-            },
-            DOWN: {
-                value: 'DOWN',
-            },
-            LEFT: {
-                value: 'LEFT',
-            },
-            RIGHT: {
-                value: 'RIGHT',
-            },
+        DIRECTION_ACTION: DIRECTION_ACTION,
+        UP: {
+            type: DIRECTION_ACTION,
+            value: 'UP',
+        },
+        DOWN: {
+            type: DIRECTION_ACTION,
+            value: 'DOWN',
+        },
+        LEFT: {
+            type: DIRECTION_ACTION,
+            value: 'LEFT',
+        },
+        RIGHT: {
+            type: DIRECTION_ACTION,
+            value: 'RIGHT',
         },
     },
 
@@ -40,12 +45,12 @@ const settings = {
     },
 };
 
-const directions = settings.playerActions.directions;
+const playerActions = settings.playerActions;
 
-directions.UP.disallowed = directions.DOWN.value;
-directions.DOWN.disallowed = directions.UP.value;
-directions.LEFT.disallowed = directions.RIGHT.value;
-directions.RIGHT.disallowed = directions.LEFT.value;
+playerActions.UP.disallowed = playerActions.DOWN.value;
+playerActions.DOWN.disallowed = playerActions.UP.value;
+playerActions.LEFT.disallowed = playerActions.RIGHT.value;
+playerActions.RIGHT.disallowed = playerActions.LEFT.value;
 
 settings.mode = settings.modes.FREE_MOVEMENT;
 // settings.mode = settings.modes.BLOCKED_BY_WORLD_BOUNDS;

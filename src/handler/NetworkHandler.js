@@ -32,6 +32,7 @@ class NetworkHandler extends EventEmitter {
     }
 
     _onDisconnection(socket) {
+        console.log('disconnected: ', socket.id);
         this.emit(NetworkHandler.events.DISCONNECT, socket.id);
     }
 

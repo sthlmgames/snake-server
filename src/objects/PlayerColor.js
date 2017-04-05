@@ -16,6 +16,10 @@ class PlayerColor {
     set occupied(value) {
         this._occupied = value;
     }
+
+    get serialized() {
+        return this._value;
+    }
 }
 
 module.exports = PlayerColor;
