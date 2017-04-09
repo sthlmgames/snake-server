@@ -4,17 +4,20 @@ const PlayerColor = require('./PlayerColor');
 
 class Player {
 
-    constructor(id, position, color, allowedToMove, gridHandler) {
+    constructor(id, position, color, alive, gridHandler) {
         this._id = id;
         this._color = color;
         this._bodyParts = [];
         this._direction = settings.playerActions.RIGHT.value;
-        this._allowedToMove = allowedToMove;
+        this._alive = alive;
         this._gridHandler = gridHandler;
 
         this.expandBody(position);
-        this.expandBody(position);
-        this.expandBody(position);
+        this.expandBody({
+            x: position.x + settings.GRID_SIZE,
+            y: position.y + settings.GRID_SIZE,
+        });
+        // this.expandBody(position);
     }
 
     get color() {
@@ -29,12 +32,12 @@ class Player {
         this._direction = newDirection;
     }
 
-    get allowedToMove() {
-        return this._allowedToMove;
+    get alive() {
+        return this._alive;
     }
 
-    set allowedToMove(allowed) {
-        this._allowedToMove = allowed;
+    set alive(allowed) {
+        this._alive = allowed;
     }
 
     get head() {
@@ -108,6 +111,11 @@ class Player {
         }
 
         return nextPosition;
+    }
+
+    kill() {
+        this._alive = false;
+        this._bodyParts.forEach(bodyPart => this._gridHandler.removeObjectFromGrid(bodyPart));
     }
 
     expandBody(position) {

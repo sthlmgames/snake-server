@@ -18,6 +18,10 @@ class GridSquare {
         return this._gameObjects.values();
     }
 
+    getOtherGameObjects(gameObjectToExclude) {
+        return Array.from(this.gameObjects).filter(gameObject => gameObject !== gameObjectToExclude);
+    }
+
     addGameObject(gameObject) {
         this._gameObjects.set(gameObject.id, gameObject);
     }
