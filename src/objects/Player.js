@@ -13,10 +13,8 @@ class Player {
         this._gridHandler = gridHandler;
 
         this.expandBody(position);
-        this.expandBody({
-            x: position.x + settings.GRID_SIZE,
-            y: position.y + settings.GRID_SIZE,
-        });
+        this.expandBody(position);
+        this.expandBody(position);
         // this.expandBody(position);
     }
 
