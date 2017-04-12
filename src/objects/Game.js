@@ -91,6 +91,8 @@ class Game {
     _removePlayer(id) {
         const player = this._players.get(id);
 
+        player.kill();
+
         player.color.occupied = false;
 
         this._players.delete(id);
@@ -136,7 +138,7 @@ class Game {
                     this._removeFruit(gameObject);
                     this._createFruit();
                     player.expandBody(player.head.position);
-                // Player to body part
+                    // Player to body part
                 } else if (gameObject instanceof BodyPart) {
                     player.kill();
                 }
