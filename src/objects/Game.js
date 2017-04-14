@@ -128,6 +128,10 @@ class Game {
         for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
             const collision = this._collisionHandler.playerWithGameObjectCollision(player);
 
+            if (!collision) {
+                return;
+            }
+
             for (const gameObject of collision) {
                 // Player to fruit
                 if (gameObject instanceof Fruit) {

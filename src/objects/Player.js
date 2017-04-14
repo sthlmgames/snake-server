@@ -42,27 +42,27 @@ class Player {
         return this._bodyParts[0];
     }
 
-    get headIsAgainstTopBounds() {
-        return this.head.y === 0;
+    get isLeftOfBounds() {
+        return this.head.x < 0;
     }
 
-    get headIsAgainstBottomBounds() {
-        return this.head.y === settings.world.HEIGHT - settings.GRID_SIZE;
+    get isRightOfBounds() {
+        return this.head.x > settings.world.WIDTH - settings.GRID_SIZE;
     }
 
-    get headIsAgainstLeftBounds() {
-        return this.head.x === 0;
+    get isAboveBounds() {
+        return this.head.y < 0;
     }
 
-    get headIsAgainstRightBounds() {
-        return this.head.x === settings.world.WIDTH - settings.GRID_SIZE;
+    get isBelowBounds() {
+        return this.head.y > settings.world.HEIGHT - settings.GRID_SIZE;
     }
 
     get isOutsideOfBounds() {
-        return this.head.x < 0 ||
-            this.head.x > settings.world.WIDTH - settings.GRID_SIZE ||
-            this.head.y < 0 ||
-            this.head.y > settings.world.HEIGHT - settings.GRID_SIZE;
+        return this.isLeftOfBounds ||
+            this.isRightOfBounds ||
+            this.isAboveBounds ||
+            this.isBelowBounds;
     }
 
     get serialized() {
@@ -73,7 +73,21 @@ class Player {
         };
     }
 
-    _handleMoveWithinWorldBounds(nextPosition) {
+    _handleWarpThroughWall(nextPosition) {
+        if (nextPosition.x < 0) {
+            nextPosition.x = settings.world.WIDTH - settings.GRID_SIZE;
+        } else if (nextPosition.x > settings.world.WIDTH - settings.GRID_SIZE) {
+            nextPosition.x = 0;
+        } else if (nextPosition.y < 0) {
+            nextPosition.y = settings.world.HEIGHT - settings.GRID_SIZE;
+        } else if (nextPosition.y > settings.world.HEIGHT - settings.GRID_SIZE) {
+            nextPosition.y = 0;
+        }
+
+        return nextPosition;
+    }
+
+    _handleMove(nextPosition) {
         if (this._direction === settings.playerActions.UP.value) {
             nextPosition.y += -settings.GRID_SIZE;
         } else if (this._direction === settings.playerActions.DOWN.value) {
@@ -84,20 +98,8 @@ class Player {
             nextPosition.x += settings.GRID_SIZE;
         }
 
-        return nextPosition;
-    }
-
-    _handleFreeMovement(nextPosition) {
-        if (this.headIsAgainstTopBounds && this._direction === settings.playerActions.UP.value) {
-            nextPosition.y = settings.world.HEIGHT - settings.GRID_SIZE;
-        } else if (this.headIsAgainstBottomBounds && this._direction === settings.playerActions.DOWN.value) {
-            nextPosition.y = 0;
-        } else if (this.headIsAgainstLeftBounds && this._direction === settings.playerActions.LEFT.value) {
-            nextPosition.x = settings.world.WIDTH - settings.GRID_SIZE;
-        } else if (this.headIsAgainstRightBounds && this._direction === settings.playerActions.RIGHT.value) {
-            nextPosition.x = 0;
-        } else {
-            nextPosition = this._handleMoveWithinWorldBounds(nextPosition);
+        if (settings.mode === settings.modes.FREE_MOVEMENT) {
+            this._handleWarpThroughWall(nextPosition);
         }
 
         return nextPosition;
@@ -109,11 +111,7 @@ class Player {
             y: head.y,
         };
 
-        if (settings.mode === settings.modes.FREE_MOVEMENT) {
-            nextPosition = this._handleFreeMovement(nextPosition);
-        } else if (settings.mode === settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
-            nextPosition = this._handleMoveWithinWorldBounds(nextPosition);
-        }
+        nextPosition = this._handleMove(nextPosition);
 
         return nextPosition;
     }

@@ -8,7 +8,7 @@ class CollisionHandler {
 
     playerWithGameObjectCollision(player) {
         const gridSquare = this._gridHandler.getGridSquare(player.head.position),
-            collision = gridSquare.occupied && gridSquare.getOtherGameObjects(player.head);
+            collision = gridSquare && gridSquare.occupied && gridSquare.getOtherGameObjects(player.head);
 
         return collision;
     }
