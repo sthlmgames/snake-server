@@ -14,13 +14,7 @@ class CollisionHandler {
     }
 
     playerWithWorldBoundsCollision(player) {
-        const collision =
-            player.headIsAgainstTopBounds && player.direction === settings.playerActions.UP ||
-            player.headIsAgainstBottomBounds && player.direction === settings.playerActions.DOWN ||
-            player.headIsAgainstLeftBounds && player.direction === settings.playerActions.LEFT ||
-            player.headIsAgainstRightBounds && player.direction === settings.playerActions.RIGHT;
-
-        return collision;
+        return player.isOutsideOfBounds;
     }
 }
 

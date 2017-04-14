@@ -34,8 +34,8 @@ class Player {
         return this._alive;
     }
 
-    set alive(allowed) {
-        this._alive = allowed;
+    set alive(newValue) {
+        this._alive = newValue;
     }
 
     get head() {
@@ -56,6 +56,13 @@ class Player {
 
     get headIsAgainstRightBounds() {
         return this.head.x === settings.world.WIDTH - settings.GRID_SIZE;
+    }
+
+    get isOutsideOfBounds() {
+        return this.head.x < 0 ||
+            this.head.x > settings.world.WIDTH - settings.GRID_SIZE ||
+            this.head.y < 0 ||
+            this.head.y > settings.world.HEIGHT - settings.GRID_SIZE;
     }
 
     get serialized() {

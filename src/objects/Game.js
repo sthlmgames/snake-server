@@ -99,10 +99,8 @@ class Game {
     }
 
     _movePlayers() {
-        for (const player of this._players.values()) {
-            if (player.alive) {
-                player.move();
-            }
+        for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
+            player.move();
         }
     }
 
@@ -117,19 +115,17 @@ class Game {
     _detectCollisions() {
         // Player to world bounds collision
         if (settings.mode === settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
-            for (const player of this._players.values()) {
+            for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
                 const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
 
-                player.alive = !collision;
+                if (collision) {
+                    player.kill();
+                }
             }
         }
 
         // Player to game object collision
-        for (const player of this._players.values()) {
-            if (!player.alive) {
-                return;
-            }
-
+        for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
             const collision = this._collisionHandler.playerWithGameObjectCollision(player);
 
             for (const gameObject of collision) {
