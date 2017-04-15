@@ -1,6 +1,7 @@
 const settings = require('../utils/settings');
 const BodyPart = require('./BodyPart');
 const PlayerColor = require('./PlayerColor');
+const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
 
 class Player {
 
@@ -16,6 +17,10 @@ class Player {
         this.expandBody(position);
         this.expandBody(position);
         // this.expandBody(position);
+    }
+
+    get id() {
+        return this._id;
     }
 
     get color() {

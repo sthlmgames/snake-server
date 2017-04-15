@@ -1,10 +1,15 @@
-const settings = require('../utils/settings');
-const GridSquare = require('../objects/GridSquare');
-
 class Action {
 
     constructor() {
 
+    }
+
+    get id() {
+        return null;
+    }
+
+    get isValid() {
+        return true;
     }
 
     execute(player) {
