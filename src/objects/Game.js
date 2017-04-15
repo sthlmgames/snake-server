@@ -171,9 +171,9 @@ class Game {
 
     startGameLoop() {
         setInterval(() => {
+            this._handleExecuteActions();
             this._movePlayers();
             this._detectCollisions();
-            this._handleExecuteActions();
 
             this._emitGameState();
         }, settings.GAME_LOOP_TIMER);
