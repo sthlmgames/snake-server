@@ -9,11 +9,11 @@ class Player {
         this._id = id;
         this._color = color;
         this._bodyParts = [];
-        this._direction = settings.playerActions.RIGHT.value;
+        this._direction = settings.playerActions.RIGHT;
         this._alive = alive;
         this._gridHandler = gridHandler;
 
-        this.expandBody(position);
+        this.expandBody(position, BodyPart.HEAD);
         this.expandBody(position);
         this.expandBody(position);
         // this.expandBody(position);
@@ -93,13 +93,13 @@ class Player {
     }
 
     _handleMove(nextPosition) {
-        if (this._direction === settings.playerActions.UP.value) {
+        if (this._direction.value === settings.playerActions.UP.value) {
             nextPosition.y += -settings.GRID_SIZE;
-        } else if (this._direction === settings.playerActions.DOWN.value) {
+        } else if (this._direction.value === settings.playerActions.DOWN.value) {
             nextPosition.y += settings.GRID_SIZE;
-        } else if (this._direction === settings.playerActions.LEFT.value) {
+        } else if (this._direction.value === settings.playerActions.LEFT.value) {
             nextPosition.x += -settings.GRID_SIZE;
-        } else if (this._direction === settings.playerActions.RIGHT.value) {
+        } else if (this._direction.value === settings.playerActions.RIGHT.value) {
             nextPosition.x += settings.GRID_SIZE;
         }
 
@@ -126,8 +126,8 @@ class Player {
         this._bodyParts.forEach(bodyPart => this._gridHandler.removeObjectFromGrid(bodyPart));
     }
 
-    expandBody(position) {
-        const newBodyPart = new BodyPart(position);
+    expandBody(position, type) {
+        const newBodyPart = new BodyPart(position, type, this);
 
         this._bodyParts.push(newBodyPart);
 

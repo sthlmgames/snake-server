@@ -143,6 +143,11 @@ class Game {
                     // Player to body part
                 } else if (gameObject instanceof BodyPart) {
                     player.kill();
+
+                    if (gameObject.type === BodyPart.HEAD &&
+                        gameObject.player.direction.value === player.direction.disallowed) {
+                        gameObject.player.kill();
+                    }
                 }
             }
         }
