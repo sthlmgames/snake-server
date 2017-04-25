@@ -2,6 +2,7 @@ const settings = require('../utils/settings');
 const NetworkHandler = require('../handler/NetworkHandler');
 const Player = require('./Player');
 const Fruit = require('./Fruit');
+const BodyPart = require('./BodyPart');
 const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
 
 class Game {
@@ -23,7 +24,9 @@ class Game {
 
     get state() {
         const state = {
-            players: Array.from(this._players.values()).map(player => player.serialized),
+            players: Array.from(this._players.values())
+                .filter(player => player.alive)
+                .map(player => player.serialized),
             fruits: Array.from(this._fruits.values()).map(fruit => fruit.serialized),
         };
 
@@ -88,16 +91,16 @@ class Game {
     _removePlayer(id) {
         const player = this._players.get(id);
 
+        player.kill();
+
         player.color.occupied = false;
 
         this._players.delete(id);
     }
 
     _movePlayers() {
-        for (const player of this._players.values()) {
-            if (player.allowedToMove) {
-                player.move();
-            }
+        for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
+            player.move();
         }
     }
 
@@ -112,22 +115,32 @@ class Game {
     _detectCollisions() {
         // Player to world bounds collision
         if (settings.mode === settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
-            for (const player of this._players.values()) {
+            for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
                 const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
 
-                player.allowedToMove = !collision;
+                if (collision) {
+                    player.kill();
+                }
             }
         }
 
-        // Player to fruit collision
-        for (const player of this._players.values()) {
+        // Player to game object collision
+        for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
             const collision = this._collisionHandler.playerWithGameObjectCollision(player);
 
+            if (!collision) {
+                return;
+            }
+
             for (const gameObject of collision) {
+                // Player to fruit
                 if (gameObject instanceof Fruit) {
                     this._removeFruit(gameObject);
                     this._createFruit();
                     player.expandBody(player.head.position);
+                    // Player to body part
+                } else if (gameObject instanceof BodyPart) {
+                    player.kill();
                 }
             }
         }

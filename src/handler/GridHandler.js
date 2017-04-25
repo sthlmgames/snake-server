@@ -50,13 +50,17 @@ class GridHandler {
     occupyGridSquare(gameObject) {
         const gridSquare = this.getGridSquare(gameObject.position);
 
-        gridSquare.addGameObject(gameObject);
+        if (gridSquare) {
+            gridSquare.addGameObject(gameObject);
+        }
     }
 
     removeObjectFromGrid(gameObject) {
         const gridSquare = this.getGridSquare(gameObject.position);
 
-        gridSquare.removeGameObject(gameObject);
+        if (gridSquare) {
+            gridSquare.removeGameObject(gameObject);
+        }
     }
 
     generateGridKey(position) {
