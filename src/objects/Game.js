@@ -10,6 +10,7 @@ class Game {
     constructor(gridHandler, collisionHandler, networkHandler) {
         this._players = new Map();
         this._fruits = new Map();
+        this._actions = new Map();
 
         this._gridHandler = gridHandler;
         this._collisionHandler = collisionHandler;
@@ -64,17 +65,17 @@ class Game {
 
         const player = this._players.get(payload.id);
 
-        let command;
+        let action;
 
         switch (payload.action.type) {
             case settings.playerActions.DIRECTION_ACTION:
-                command = new ChangeDirectionAction(player, payload.action);
+                action = new ChangeDirectionAction(player, payload.action);
                 break;
             default:
                 console.log('Unknown player action...');
         }
 
-        command.execute();
+        this._addAction(player.id, action);
     }
 
     _addPlayer(id) {
@@ -86,6 +87,7 @@ class Game {
         randomColor.occupied = true;
 
         this._players.set(id, player);
+        this._actions.set(id, new Map());
     }
 
     _removePlayer(id) {
@@ -151,8 +153,25 @@ class Game {
         this._gridHandler.removeObjectFromGrid(fruit);
     }
 
+    _addAction(playerId, action) {
+        this._actions.get(playerId).set(action.id, action);
+    }
+
+    _handleExecuteActions() {
+        for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
+            const playerActions = this._actions.get(player.id);
+
+            // Change direction actions
+            if (playerActions.get(ChangeDirectionAction.id)) {
+                playerActions.get(ChangeDirectionAction.id).execute();
+                playerActions.delete(ChangeDirectionAction.id);
+            }
+        }
+    }
+
     startGameLoop() {
         setInterval(() => {
+            this._handleExecuteActions();
             this._movePlayers();
             this._detectCollisions();
 

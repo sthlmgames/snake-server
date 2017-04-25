@@ -10,15 +10,25 @@ class ChangeDirectionAction extends Action {
         this._direction = direction;
     }
 
-    execute() {
-        const playerDisallowed = (this._player.direction === settings.playerActions[this._direction.value].disallowed);
+    get id() {
+        return settings.playerActions.DIRECTION_ACTION;
+    }
 
-        if (playerDisallowed) {
+    get isValid() {
+        const actionIsOpposite = (this._player.direction === settings.playerActions[this._direction.value].disallowed);
+
+        return !actionIsOpposite;
+    }
+
+    execute() {
+        if (!this.isValid) {
             return;
         }
 
         this._player.direction = this._direction.value;
     }
 }
+
+ChangeDirectionAction.id = settings.playerActions.DIRECTION_ACTION;
 
 module.exports = ChangeDirectionAction;
