@@ -19,7 +19,7 @@ const collisionHandler = new CollisionHandler(gridHandler);
 
 const game = new Game(gridHandler, collisionHandler, networkHandler);
 
-game.startGameLoop();
+// game.startGameLoop();
 
 
 // Necessary server stuff below

@@ -3,7 +3,9 @@ const DIRECTION_ACTION = 'direction-action';
 const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 20,
-    GAME_LOOP_TIMER: 500,
+    GAME_LOOP_TIMER: 50,
+    START_POSITION_OFFSET: 100,
+    startPositions: [],
     modes: {
         FREE_MOVEMENT: 'free-movement',
         BLOCKED_BY_WORLD_BOUNDS: 'blocked-by-world-bounds',
@@ -35,15 +37,32 @@ const settings = {
 
     messages: {
         YOU_CONNECTED: 'you-connected',
-        GAME_STARTED: 'game-started',
+        // GAME_STARTED: 'game-started',
         GAME_STATE: 'game-state',
 
         PLAYER_ACTION: 'player-action',
 
+
+        // socket.io specific messages
         DISCONNECT: 'disconnect',
-        CONNECT: 'connection',
+        CONNECT: 'connect',
     },
+
 };
+
+settings.startPositions = [{
+    x: settings.START_POSITION_OFFSET,
+    y: settings.START_POSITION_OFFSET,
+}, {
+    x: settings.world.WIDTH - settings.START_POSITION_OFFSET,
+    y: settings.world.HEIGHT - settings.START_POSITION_OFFSET,
+}, {
+    x: settings.world.WIDTH - settings.START_POSITION_OFFSET,
+    y: settings.START_POSITION_OFFSET,
+}, {
+    x: settings.START_POSITION_OFFSET,
+    y: settings.world.HEIGHT - settings.START_POSITION_OFFSET,
+}];
 
 const playerActions = settings.playerActions;
 

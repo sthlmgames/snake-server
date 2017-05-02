@@ -19,8 +19,6 @@ class Game {
         this._networkHandler.on(NetworkHandler.events.CONNECT, this._onPlayerConnected.bind(this));
         this._networkHandler.on(NetworkHandler.events.DISCONNECT, this._onPlayerDisconnected.bind(this));
         this._networkHandler.on(NetworkHandler.events.PLAYER_ACTION, this._onPlayerAction.bind(this));
-
-        this._createFruit();
     }
 
     get state() {
@@ -43,12 +41,13 @@ class Game {
     _onPlayerConnected(id) {
         console.log('_onPlayerConnected', id);
 
-        this._addPlayer(id);
+        const player = this._addPlayer(id);
 
-        if (this._players.size === 1) {
-            this._networkHandler.emitGameStarted();
-        }
+        // if (this._players.size === 1) {
+        //     this._networkHandler.emitGameStarted();
+        // }
 
+        // this._emitThisIsYou(player.serialized);
         this._emitGameState();
     }
 
@@ -79,7 +78,7 @@ class Game {
     }
 
     _addPlayer(id) {
-        const position = this._gridHandler.randomGridPosition,
+        const position = (settings.startPositions[this._players.size] || this._gridHandler.randomGridPosition),
             freeColors = Player.colors.filter(color => !color.occupied),
             randomColor = freeColors[Math.floor(Math.random() * freeColors.length)],
             player = new Player(id, position, randomColor, true, this._gridHandler);
@@ -88,6 +87,8 @@ class Game {
 
         this._players.set(id, player);
         this._actions.set(id, new Map());
+
+        return player;
     }
 
     _removePlayer(id) {

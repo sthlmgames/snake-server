@@ -15,12 +15,12 @@ class NetworkHandler extends EventEmitter {
     _onConnection(socket) {
         console.log('connected: ', socket.id);
 
-        this.emit(NetworkHandler.events.CONNECT, socket.id);
-
         socket.emit(settings.messages.YOU_CONNECTED, {
             id: socket.id,
             settings: settings,
         });
+
+        this.emit(NetworkHandler.events.CONNECT, socket.id);
 
         socket.on(settings.messages.DISCONNECT, () => {
             this._onDisconnection(socket);
@@ -42,9 +42,9 @@ class NetworkHandler extends EventEmitter {
         });
     }
 
-    emitGameStarted() {
-        this._io.emit(settings.messages.GAME_STARTED);
-    }
+    // emitGameStarted() {
+    //     this._io.emit(settings.messages.GAME_STARTED);
+    // }
 
     emitGameState(gameState) {
         this._io.emit(settings.messages.GAME_STATE, gameState);
