@@ -14,9 +14,8 @@ class Player {
         this._gridHandler = gridHandler;
 
         this.expandBody(position, BodyPart.HEAD);
-        this.expandBody(position);
-        this.expandBody(position);
-        // this.expandBody(position);
+        this.expandBody(position, BodyPart.BODY);
+        this.expandBody(position, BodyPart.BODY);
     }
 
     get id() {
@@ -140,7 +139,11 @@ class Player {
 
         this._gridHandler.removeObjectFromGrid(tail);
 
+        this.head.type = BodyPart.BODY;
+
         this._bodyParts.unshift(tail);
+
+        tail.type = BodyPart.HEAD;
 
         tail.x = nextPosition.x;
         tail.y = nextPosition.y;

@@ -12,11 +12,16 @@ class BodyPart extends GameObject {
         return this._type;
     }
 
+    set type(value) {
+        this._type = value;
+    }
+
     get player() {
         return this._player;
     }
 }
 
 BodyPart.HEAD = 'head';
+BodyPart.BODY = 'body';
 
 module.exports = BodyPart;
