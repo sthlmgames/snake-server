@@ -4,6 +4,7 @@ const Player = require('./Player');
 const Fruit = require('./Fruit');
 const BodyPart = require('./BodyPart');
 const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
+const GameRound = require('./GameRound');
 
 class Game {
 
@@ -12,11 +13,14 @@ class Game {
         this._fruits = new Map();
         this._actions = new Map();
 
+        this._gameRound = null;
+
         this._gridHandler = gridHandler;
         this._collisionHandler = collisionHandler;
         this._networkHandler = networkHandler;
 
         this._networkHandler.on(NetworkHandler.events.CONNECT, this._onPlayerConnected.bind(this));
+        this._networkHandler.on(NetworkHandler.events.CLIENT_LOADED, this._onClientLoaded.bind(this));
         this._networkHandler.on(NetworkHandler.events.DISCONNECT, this._onPlayerDisconnected.bind(this));
         this._networkHandler.on(NetworkHandler.events.PLAYER_ACTION, this._onPlayerAction.bind(this));
     }
@@ -39,21 +43,26 @@ class Game {
     }
 
     _onPlayerConnected(id) {
-        console.log('_onPlayerConnected', id);
+        this._addPlayer(id);
+    }
 
-        const player = this._addPlayer(id);
+    _onClientLoaded(id) {
+        console.log('client readyyyy');
+        this._players.get(id).ready = true;
 
-        // if (this._players.size === 1) {
-        //     this._networkHandler.emitGameStarted();
-        // }
-
-        // this._emitThisIsYou(player.serialized);
         this._emitGameState();
+
+        const allPlayersLoaded = (Array.from(this._players.values()).filter(player => player.ready).length === this._players.size);
+
+        console.log(allPlayersLoaded);
+
+        if (this._players.size === 2 && allPlayersLoaded) {
+            this._gameRound = new GameRound(this._networkHandler);
+            // this._startGameRound();
+        }
     }
 
     _onPlayerDisconnected(id) {
-        console.log('_onPlayerDisconnected', id);
-
         this._removePlayer(id);
 
         this._emitGameState();

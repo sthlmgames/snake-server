@@ -13,14 +13,16 @@ class NetworkHandler extends EventEmitter {
     }
 
     _onConnection(socket) {
-        console.log('connected: ', socket.id);
-
         socket.emit(settings.messages.YOU_CONNECTED, {
             id: socket.id,
             settings: settings,
         });
 
         this.emit(NetworkHandler.events.CONNECT, socket.id);
+
+        socket.on(settings.messages.CLIENT_LOADED, () => {
+            this.emit(NetworkHandler.events.CLIENT_LOADED, socket.id);
+        });
 
         socket.on(settings.messages.DISCONNECT, () => {
             this._onDisconnection(socket);
@@ -46,6 +48,10 @@ class NetworkHandler extends EventEmitter {
     //     this._io.emit(settings.messages.GAME_STARTED);
     // }
 
+    emitGameRoundCountdown() {
+        this._io.emit(settings.messages.GAME_ROUND_INITIATED);
+    }
+
     emitGameState(gameState) {
         this._io.emit(settings.messages.GAME_STATE, gameState);
     }
@@ -55,6 +61,7 @@ NetworkHandler.events = {
     CONNECT: 'on-connection',
     DISCONNECT: 'on-disconnection',
     PLAYER_ACTION: 'on-player-action',
+    CLIENT_LOADED: 'on-client-loaded',
 };
 
 module.exports = NetworkHandler;

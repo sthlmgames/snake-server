@@ -25,7 +25,7 @@ const game = new Game(gridHandler, collisionHandler, networkHandler);
 // Necessary server stuff below
 app.use(express.static(path.join(__dirname, PUBLIC_FOLDER)));
 
-server.listen(PORT);
+server.listen(PORT, '0.0.0.0');
 
 app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname, PUBLIC_FOLDER, 'index.html'));

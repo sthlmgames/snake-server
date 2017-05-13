@@ -1,7 +1,6 @@
 const settings = require('../utils/settings');
 const BodyPart = require('./BodyPart');
 const PlayerColor = require('./PlayerColor');
-const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
 
 class Player {
 
@@ -12,6 +11,8 @@ class Player {
         this._direction = settings.playerActions.RIGHT;
         this._alive = alive;
         this._gridHandler = gridHandler;
+        this._score = 0;
+        this._ready = false;
 
         this.expandBody(position, BodyPart.HEAD);
         this.expandBody(position, BodyPart.BODY);
@@ -67,6 +68,14 @@ class Player {
             this.isRightOfBounds ||
             this.isAboveBounds ||
             this.isBelowBounds;
+    }
+
+    get ready() {
+        return this._ready;
+    }
+
+    set ready(newValue) {
+        this._ready = newValue
     }
 
     get serialized() {

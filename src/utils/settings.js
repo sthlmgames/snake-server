@@ -36,10 +36,14 @@ const settings = {
     },
 
     messages: {
+        // Sent from server
         YOU_CONNECTED: 'you-connected',
+        GAME_ROUND_INITIATED: 'game-round-initiated',
         // GAME_STARTED: 'game-started',
         GAME_STATE: 'game-state',
 
+        // Sent from client
+        CLIENT_LOADED: 'client-loaded',
         PLAYER_ACTION: 'player-action',
 
 
