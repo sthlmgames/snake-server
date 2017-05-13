@@ -31,7 +31,7 @@ class Game {
             fruits: Array.from(this._fruits.values()).map(fruit => fruit.serialized),
         };
 
-        console.log(Array.from(this._players.values()).map(player => player.serialized));
+        // console.log(Array.from(this._players.values()).map(player => player.serialized));
 
         return state;
     }
@@ -127,6 +127,8 @@ class Game {
         }
 
         // Player to game object collision
+        const playersToKill = [];
+
         for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
             const collision = this._collisionHandler.playerWithGameObjectCollision(player);
 
@@ -142,9 +144,18 @@ class Game {
                     player.expandBody(player.head.position);
                     // Player to body part
                 } else if (gameObject instanceof BodyPart) {
-                    player.kill();
+                    playersToKill.push(player);
+
+                    if (gameObject.type === BodyPart.HEAD) {
+                        playersToKill.push(gameObject.player);
+                    }
                 }
             }
+        }
+
+        // Kill players
+        for (const player of playersToKill) {
+            player.kill();
         }
     }
 

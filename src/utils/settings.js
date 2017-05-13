@@ -3,14 +3,14 @@ const DIRECTION_ACTION = 'direction-action';
 const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 20,
-    GAME_LOOP_TIMER: 50,
+    GAME_LOOP_TIMER: 500,
     modes: {
         FREE_MOVEMENT: 'free-movement',
         BLOCKED_BY_WORLD_BOUNDS: 'blocked-by-world-bounds',
     },
     world: {
-        WIDTH: 1000,
-        HEIGHT: 600
+        WIDTH: 400,
+        HEIGHT: 200
     },
 
     playerActions: {
