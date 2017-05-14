@@ -44,16 +44,16 @@ class NetworkHandler extends EventEmitter {
         });
     }
 
-    // emitGameStarted() {
-    //     this._io.emit(settings.messages.GAME_STARTED);
-    // }
+    emitGameState(gameState) {
+        this._io.emit(settings.messages.GAME_STATE, gameState);
+    }
 
-    emitGameRoundCountdown() {
+    emitGameRoundInitiated() {
         this._io.emit(settings.messages.GAME_ROUND_INITIATED);
     }
 
-    emitGameState(gameState) {
-        this._io.emit(settings.messages.GAME_STATE, gameState);
+    emitGameRoundCountdown(countdownValue) {
+        this._io.emit(settings.messages.GAME_ROUND_COUNTDOWN, countdownValue);
     }
 }
 

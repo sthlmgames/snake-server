@@ -1,28 +1,28 @@
+const settings = require('../utils/settings');
 
 class GameRound {
 
-    constructor(networkHandler, players) {
+    constructor(networkHandler, onCountdownCompletedCallback) {
         this._networkHandler = networkHandler;
-        this._players = players;
 
-        this._networkHandler.emitGameRoundCountdown();
+        this._networkHandler.emitGameRoundInitiated();
+        this._initCountdown(onCountdownCompletedCallback);
     }
 
-    _initCountdown() {
-        const countdownElement = document.querySelector('.countdown');
+    _initCountdown(onCountdownCompletedCallback) {
         let countdownValue = 3;
         let countdownTimer;
 
-        countdownElement.innerHTML = countdownValue;
+        countdownTimer = setInterval(() => {
+            this._networkHandler.emitGameRoundCountdown(countdownValue);
 
-        countdownTimer = window.setInterval(() => {
-            countdownElement.innerHTML = countdownValue;
             countdownValue--;
 
             if (countdownValue === -1) {
-                window.clearInterval(countdownTimer);
+                clearInterval(countdownTimer);
+                onCountdownCompletedCallback();
             }
-        }, 1000);
+        }, settings.GAME_ROUND_COUNTDOWN_TIMER);
     }
 }
 

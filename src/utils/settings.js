@@ -4,6 +4,7 @@ const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 20,
     GAME_LOOP_TIMER: 50,
+    GAME_ROUND_COUNTDOWN_TIMER: 1000,
     START_POSITION_OFFSET: 100,
     startPositions: [],
     modes: {
@@ -38,9 +39,9 @@ const settings = {
     messages: {
         // Sent from server
         YOU_CONNECTED: 'you-connected',
-        GAME_ROUND_INITIATED: 'game-round-initiated',
-        // GAME_STARTED: 'game-started',
         GAME_STATE: 'game-state',
+        GAME_ROUND_INITIATED: 'game-round-initiated',
+        GAME_ROUND_COUNTDOWN: 'game-round-countdown',
 
         // Sent from client
         CLIENT_LOADED: 'client-loaded',

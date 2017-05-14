@@ -54,11 +54,10 @@ class Game {
 
         const allPlayersLoaded = (Array.from(this._players.values()).filter(player => player.ready).length === this._players.size);
 
-        console.log(allPlayersLoaded);
-
         if (this._players.size === 2 && allPlayersLoaded) {
-            this._gameRound = new GameRound(this._networkHandler);
-            // this._startGameRound();
+            this._gameRound = new GameRound(this._networkHandler, () => {
+                console.log('Countdown completed');
+            });
         }
     }
 
