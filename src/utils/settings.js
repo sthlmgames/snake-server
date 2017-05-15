@@ -5,6 +5,7 @@ const settings = {
     GRID_SIZE: 20,
     GAME_LOOP_TIMER: 50,
     GAME_ROUND_COUNTDOWN_TIMER: 1000,
+    REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND: 2,
     START_POSITION_OFFSET: 100,
     startPositions: [],
     modes: {
@@ -36,6 +37,7 @@ const settings = {
         },
     },
 
+    // WebSocket message protocol
     messages: {
         // Sent from server
         YOU_CONNECTED: 'you-connected',
@@ -52,7 +54,6 @@ const settings = {
         DISCONNECT: 'disconnect',
         CONNECT: 'connect',
     },
-
 };
 
 settings.startPositions = [{
