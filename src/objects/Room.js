@@ -3,15 +3,13 @@ const NetworkHandler = require('../handler/NetworkHandler');
 const Player = require('./Player');
 const GameRound = require('./GameRound');
 
-class Game {
+class Room {
 
-    constructor(gridHandler, collisionHandler, networkHandler) {
+    constructor(networkHandler) {
         this._players = new Map();
 
         this._gameRound = null;
 
-        this._gridHandler = gridHandler;
-        this._collisionHandler = collisionHandler;
         this._networkHandler = networkHandler;
 
         this._networkHandler.on(NetworkHandler.events.CONNECT, this._onPlayerConnected.bind(this));
@@ -22,16 +20,14 @@ class Game {
     get state() {
         const state = {
             players: Array.from(this._players.values())
-                .filter(player => player.alive)
                 .map(player => player.serialized),
-            fruits: [],
         };
 
         return state;
     }
 
-    _emitGameState() {
-        this._networkHandler.emitGameState(this.state);
+    _emitRoomState() {
+        this._networkHandler.emitRoomState(this.state);
     }
 
     _onPlayerConnected(id) {
@@ -41,30 +37,31 @@ class Game {
     _onClientLoaded(id) {
         this._players.get(id).ready = true;
 
-        this._emitGameState();
+        this._emitRoomState();
 
         const allPlayersLoaded = (Array.from(this._players.values()).filter(player => player.ready).length === this._players.size);
 
         if (this._players.size === settings.REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND && allPlayersLoaded) {
-            this._gameRound = new GameRound(this._networkHandler, this._gridHandler, this._collisionHandler, this._players);
+            this._gameRound = new GameRound(this._networkHandler, this._players);
         }
     }
 
     _onPlayerDisconnected(id) {
         this._removePlayer(id);
 
-        this._emitGameState();
+        const stopGameRound = this._players.size === 1 && this._gameRound;
 
-        if (this._players.size < settings.REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND && this._gameRound) {
+        if (stopGameRound) {
             this._gameRound.stop();
         }
+
+        this._emitRoomState();
     }
 
     _addPlayer(id) {
-        const position = (settings.startPositions[this._players.size] || this._gridHandler.randomGridPosition),
-            freeColors = Player.colors.filter(color => !color.occupied),
-            randomColor = freeColors[Math.floor(Math.random() * freeColors.length)],
-            player = new Player(id, position, randomColor, true, this._gridHandler);
+        const freeColors = Player.colors.filter(color => !color.occupied);
+        const randomColor = freeColors[Math.floor(Math.random() * freeColors.length)];
+        const player = new Player(id, randomColor);
 
         randomColor.occupied = true;
 
@@ -84,4 +81,4 @@ class Game {
     }
 }
 
-module.exports = Game;
+module.exports = Room;

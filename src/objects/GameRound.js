@@ -1,16 +1,19 @@
 const settings = require('../utils/settings');
 const NetworkHandler = require('../handler/NetworkHandler');
+const CollisionHandler = require('../handler/CollisionHandler');
+const Grid = require('./Grid');
 const Fruit = require('./Fruit');
 const BodyPart = require('./BodyPart');
 const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
 
 class GameRound {
 
-    constructor(networkHandler, gridHandler, collisionHandler, players) {
+    constructor(networkHandler, players) {
         this._networkHandler = networkHandler;
-        this._gridHandler = gridHandler;
-        this._collisionHandler = collisionHandler;
         this._players = players;
+
+        this._grid = new Grid();
+        this._collisionHandler = new CollisionHandler(this._grid);
 
         this._actions = new Map();
         this._fruits = new Map();
@@ -19,12 +22,22 @@ class GameRound {
 
         this._networkHandler.on(NetworkHandler.events.PLAYER_ACTION, this._onPlayerAction.bind(this));
 
+        this._initPlayers();
         this._initCountdown();
-        this._initPlayerActions();
 
-        this._networkHandler.emitGameRoundInitiated();
+        this._networkHandler.emitGameRoundInitiated(this.initialState);
     }
 
+    get initialState() {
+        const initialState = {
+            players: Array.from(this._players.values())
+                .map(player => player.serialized),
+        };
+
+        return initialState;
+    }
+
+    // TODO rename to gameState
     get state() {
         const state = {
             players: Array.from(this._players.values())
@@ -41,7 +54,7 @@ class GameRound {
     }
 
     _initCountdown() {
-        console.log('Game countdown...');
+        console.log('Room countdown...');
 
         let countdownValue = 3;
         let countdownTimer;
@@ -60,8 +73,19 @@ class GameRound {
         }, settings.GAME_ROUND_COUNTDOWN_TIMER);
     }
 
+    _initPlayers() {
+        for (const [index, player] of Array.from(this._players.values()).entries()) {
+            const position = (settings.startPositions[index] || this._grid.randomGridPosition);
+
+            this._actions.set(player.id, new Map());
+
+            player.grid = this._grid;
+            player.initBody(position);
+        }
+    }
+
     _start() {
-        console.log('Game round started');
+        console.log('Room round started');
 
         this._gameLoopTimer = setInterval(() => {
             this._handleExecuteActions();
@@ -70,14 +94,6 @@ class GameRound {
 
             this._emitGameState();
         }, settings.GAME_LOOP_TIMER);
-    }
-
-    _initPlayerActions() {
-        this._actions.clear();
-
-        for (const player of Array.from(this._players.values())) {
-            this._actions.set(player.id, new Map());
-        }
     }
 
     _onPlayerAction(payload) {
@@ -133,70 +149,67 @@ class GameRound {
         this._gridHandler.removeObjectFromGrid(fruit);
     }
 
-    _resetGameObjects() {
-        for (const player of Array.from(this._players.values())) {
-            player.kill();
-        }
-
-        for (const fruit of Array.from(this._fruits.values())) {
-            this._removeFruit(fruit);
-        }
-
-        this._fruits.clear();
-    }
-
     _detectCollisions() {
-        // Player to world bounds collision
-        if (settings.mode === settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
-            for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
-                const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
 
-                if (collision) {
-                    player.kill();
-                }
-            }
-        }
+        function detectPlayerWithWorldBoundsCollision() {
+            // Player to world bounds collision
+            if (settings.mode === settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
+                for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
+                    const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
 
-        // Player to game object collision
-        const playersToKill = [];
-
-        for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
-            const collision = this._collisionHandler.playerWithGameObjectCollision(player);
-
-            if (!collision) {
-                return;
-            }
-
-            for (const gameObject of collision) {
-                // Player to fruit
-                if (gameObject instanceof Fruit) {
-                    this._removeFruit(gameObject);
-                    this._createFruit();
-                    player.expandBody(player.head.position);
-                    // Player to body part
-                } else if (gameObject instanceof BodyPart) {
-                    playersToKill.push(player);
-
-                    if (gameObject.type === BodyPart.HEAD) {
-                        playersToKill.push(gameObject.player);
+                    if (collision) {
+                        player.kill();
                     }
                 }
             }
         }
 
+        function detectPlayerWithGameObjectCollision() {
+            for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
+                const collision = this._collisionHandler.playerWithGameObjectCollision(player);
+
+                if (!collision) {
+                    return;
+                }
+
+                for (const gameObject of collision) {
+                    // Player to fruit
+                    if (gameObject instanceof Fruit) {
+                        this._removeFruit(gameObject);
+                        this._createFruit();
+                        player.expandBody(player.head.position);
+                        // Player to body part
+                    } else if (gameObject instanceof BodyPart) {
+                        playersToKill.push(player);
+
+                        if (gameObject.type === BodyPart.HEAD) {
+                            playersToKill.push(gameObject.player);
+                        }
+                    }
+                }
+            }
+        }
+
+        const playersToKill = [];
+
+        detectPlayerWithWorldBoundsCollision.call(this);
+        detectPlayerWithGameObjectCollision.call(this);
+
         // Kill players
         for (const player of playersToKill) {
             player.kill();
         }
+
+        // Stop game round if we have a winner
+        if (Array.from(this._players.values()).filter(player => player.alive).length === 1) {
+            this.stop();
+        }
     }
 
     stop() {
-        console.log('Game round stopped');
+        console.log('Room round stopped');
 
         clearInterval(this._gameLoopTimer);
-
-        this._resetGameObjects();
-        this._initPlayerActions();
     }
 }
 

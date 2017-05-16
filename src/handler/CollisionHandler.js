@@ -1,5 +1,3 @@
-const settings = require('../utils/settings');
-
 class CollisionHandler {
 
     constructor(gridHandler) {
