@@ -3,8 +3,9 @@ const DIRECTION_ACTION = 'direction-action';
 const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 20,
-    GAME_LOOP_TIMER: 50,
+    GAME_LOOP_TIMER: 500,
     GAME_ROUND_COUNTDOWN_TIMER: 1000,
+    REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND: 2,
     START_POSITION_OFFSET: 100,
     startPositions: [],
     modes: {
@@ -36,12 +37,14 @@ const settings = {
         },
     },
 
+    // WebSocket message protocol
     messages: {
         // Sent from server
         YOU_CONNECTED: 'you-connected',
-        GAME_STATE: 'game-state',
+        ROOM_STATE: 'room-state',
         GAME_ROUND_INITIATED: 'game-round-initiated',
         GAME_ROUND_COUNTDOWN: 'game-round-countdown',
+        GAME_STATE: 'game-state',
 
         // Sent from client
         CLIENT_LOADED: 'client-loaded',
@@ -52,7 +55,6 @@ const settings = {
         DISCONNECT: 'disconnect',
         CONNECT: 'connect',
     },
-
 };
 
 settings.startPositions = [{

@@ -1,7 +1,7 @@
 const settings = require('../utils/settings');
-const GridSquare = require('../objects/GridSquare');
+const GridSquare = require('./GridSquare');
 
-class GridHandler {
+class Grid {
 
     constructor() {
         this._grid = new Map();
@@ -68,4 +68,4 @@ class GridHandler {
     }
 }
 
-module.exports = GridHandler;
+module.exports = Grid;

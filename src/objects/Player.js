@@ -4,19 +4,15 @@ const PlayerColor = require('./PlayerColor');
 
 class Player {
 
-    constructor(id, position, color, alive, gridHandler) {
+    constructor(id, color) {
         this._id = id;
         this._color = color;
         this._bodyParts = [];
         this._direction = settings.playerActions.RIGHT;
-        this._alive = alive;
-        this._gridHandler = gridHandler;
+        this._alive = true;
+        this._grid = null;
         this._score = 0;
         this._ready = false;
-
-        this.expandBody(position, BodyPart.HEAD);
-        this.expandBody(position, BodyPart.BODY);
-        this.expandBody(position, BodyPart.BODY);
     }
 
     get id() {
@@ -86,6 +82,10 @@ class Player {
         };
     }
 
+    set grid(newValue) {
+        this._grid = newValue;
+    }
+
     _handleWarpThroughWall(nextPosition) {
         if (nextPosition.x < 0) {
             nextPosition.x = settings.world.WIDTH - settings.GRID_SIZE;
@@ -129,9 +129,15 @@ class Player {
         return nextPosition;
     }
 
+    initBody(position) {
+        this.expandBody(position, BodyPart.HEAD);
+        this.expandBody(position, BodyPart.BODY);
+        this.expandBody(position, BodyPart.BODY);
+    }
+
     kill() {
         this._alive = false;
-        this._bodyParts.forEach(bodyPart => this._gridHandler.removeObjectFromGrid(bodyPart));
+        this._bodyParts.forEach(bodyPart => this._grid.removeObjectFromGrid(bodyPart));
     }
 
     expandBody(position, type) {
@@ -139,14 +145,14 @@ class Player {
 
         this._bodyParts.push(newBodyPart);
 
-        this._gridHandler.occupyGridSquare(newBodyPart);
+        this._grid.occupyGridSquare(newBodyPart);
     }
 
     move() {
         const tail = this._bodyParts.pop(),
             nextPosition = this._getNextPosition(this.head);
 
-        this._gridHandler.removeObjectFromGrid(tail);
+        this._grid.removeObjectFromGrid(tail);
 
         this.head.type = BodyPart.BODY;
 
@@ -157,7 +163,7 @@ class Player {
         tail.x = nextPosition.x;
         tail.y = nextPosition.y;
 
-        this._gridHandler.occupyGridSquare(tail);
+        this._grid.occupyGridSquare(tail);
     }
 }
 
