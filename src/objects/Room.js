@@ -39,10 +39,18 @@ class Room {
 
         this._emitRoomState();
 
+        this._handleCreateGameRound();
+    }
+
+    _handleCreateGameRound() {
         const allPlayersLoaded = (Array.from(this._players.values()).filter(player => player.ready).length === this._players.size);
 
         if (this._players.size === settings.REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND && allPlayersLoaded) {
-            this._gameRound = new GameRound(this._networkHandler, this._players);
+            this._gameRound = new GameRound(this._networkHandler, this._players,
+                function onWinnerDecided() {
+                    // TODO change this recursive behaviour(it never ends)
+                    this._handleCreateGameRound();
+                }.bind(this));
         }
     }
 

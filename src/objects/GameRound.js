@@ -8,9 +8,10 @@ const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
 
 class GameRound {
 
-    constructor(networkHandler, players) {
+    constructor(networkHandler, players, onWinnerDecidedCallback) {
         this._networkHandler = networkHandler;
         this._players = players;
+        this._onWinnerDecidedCallback = onWinnerDecidedCallback;
 
         this._grid = new Grid();
         this._collisionHandler = new CollisionHandler(this._grid);
@@ -110,6 +111,7 @@ class GameRound {
             this._handleExecuteActions();
             this._movePlayers();
             this._detectCollisions();
+            this._handleDecideWinner();
 
             this._emitGameState();
         }, settings.GAME_LOOP_TIMER);
@@ -168,6 +170,13 @@ class GameRound {
         this._grid.removeObjectFromGrid(fruit);
     }
 
+    _handleDecideWinner() {
+        if (Array.from(this._players.values()).filter(player => player.alive).length === 1) {
+            this.stop();
+            this._onWinnerDecidedCallback();
+        }
+    }
+
     _detectCollisions() {
 
         function detectPlayerWithWorldBoundsCollision() {
@@ -218,15 +227,9 @@ class GameRound {
         for (const player of playersToKill) {
             player.kill();
         }
-
-        // Stop game round if we have a winner
-        if (Array.from(this._players.values()).filter(player => player.alive).length === 1) {
-            this.stop();
-        }
     }
 
     stop() {
-        console.log('Room round stopped', this._playerActionListener);
         this._handleRemoveListeners();
         this._stopCountdown();
         clearInterval(this._gameLoopTimerId);
