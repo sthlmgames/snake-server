@@ -49,7 +49,7 @@ class Room {
     _onPlayerDisconnected(id) {
         this._removePlayer(id);
 
-        const stopGameRound = this._players.size === 1 && this._gameRound;
+        const stopGameRound = this._players.size === 0 && this._gameRound;
 
         if (stopGameRound) {
             this._gameRound.stop();

@@ -18,9 +18,10 @@ class GameRound {
         this._actions = new Map();
         this._fruits = new Map();
 
-        this._gameLoopTimer = null;
+        this._gameLoopTimerId = null;
+        this._countdownTimerId = null;
 
-        this._networkHandler.on(NetworkHandler.events.PLAYER_ACTION, this._onPlayerAction.bind(this));
+        this._playerActionListener = null;
 
         this._initPlayers();
         this._initCountdown();
@@ -49,17 +50,27 @@ class GameRound {
         return state;
     }
 
+    _addListeners() {
+        this._playerActionListener = this._onPlayerAction.bind(this);
+        this._networkHandler.on(NetworkHandler.events.PLAYER_ACTION, this._playerActionListener);
+    }
+
+    _handleRemoveListeners() {
+        if (this._playerActionListener) {
+            this._networkHandler.removeListener(NetworkHandler.events.PLAYER_ACTION, this._playerActionListener);
+        }
+    }
+
     _emitGameState() {
         this._networkHandler.emitGameState(this.state);
     }
 
     _initCountdown() {
-        console.log('Room countdown...');
+        console.log('Game round countdown...');
 
         let countdownValue = 3;
-        let countdownTimer;
 
-        countdownTimer = setInterval(() => {
+        this._countdownTimerId = setInterval(() => {
             console.log(countdownValue);
 
             this._networkHandler.emitGameRoundCountdown(countdownValue);
@@ -67,10 +78,14 @@ class GameRound {
             countdownValue--;
 
             if (countdownValue === -1) {
-                clearInterval(countdownTimer);
+                this._stopCountdown();
                 this._start();
             }
         }, settings.GAME_ROUND_COUNTDOWN_TIMER);
+    }
+
+    _stopCountdown() {
+        clearInterval(this._countdownTimerId);
     }
 
     _initPlayers() {
@@ -87,7 +102,11 @@ class GameRound {
     _start() {
         console.log('Room round started');
 
-        this._gameLoopTimer = setInterval(() => {
+        this._addListeners();
+
+        this._createFruit();
+
+        this._gameLoopTimerId = setInterval(() => {
             this._handleExecuteActions();
             this._movePlayers();
             this._detectCollisions();
@@ -137,16 +156,16 @@ class GameRound {
     }
 
     _createFruit() {
-        const position = this._gridHandler.randomGridPosition,
+        const position = this._grid.randomGridPosition,
             fruit = new Fruit(position);
 
         this._fruits.set(fruit.id, fruit);
-        this._gridHandler.occupyGridSquare(fruit);
+        this._grid.occupyGridSquare(fruit);
     }
 
     _removeFruit(fruit) {
         this._fruits.delete(fruit.id);
-        this._gridHandler.removeObjectFromGrid(fruit);
+        this._grid.removeObjectFromGrid(fruit);
     }
 
     _detectCollisions() {
@@ -207,9 +226,10 @@ class GameRound {
     }
 
     stop() {
-        console.log('Room round stopped');
-
-        clearInterval(this._gameLoopTimer);
+        console.log('Room round stopped', this._playerActionListener);
+        this._handleRemoveListeners();
+        this._stopCountdown();
+        clearInterval(this._gameLoopTimerId);
     }
 }
 
