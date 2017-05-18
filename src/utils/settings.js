@@ -13,8 +13,8 @@ const settings = {
         BLOCKED_BY_WORLD_BOUNDS: 'blocked-by-world-bounds',
     },
     world: {
-        WIDTH: 400,
-        HEIGHT: 200
+        WIDTH: 800,
+        HEIGHT: 400
     },
 
     playerActions: {
