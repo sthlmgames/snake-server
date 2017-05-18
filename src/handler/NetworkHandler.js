@@ -13,13 +13,17 @@ class NetworkHandler extends EventEmitter {
     }
 
     _onConnection(socket) {
-        console.log('connected: ', socket.id);
-
-        this.emit(NetworkHandler.events.CONNECT, socket.id);
+        console.log('Player connected', socket.id);
 
         socket.emit(settings.messages.YOU_CONNECTED, {
             id: socket.id,
             settings: settings,
+        });
+
+        this.emit(NetworkHandler.events.CONNECT, socket.id);
+
+        socket.on(settings.messages.CLIENT_LOADED, () => {
+            this.emit(NetworkHandler.events.CLIENT_LOADED, socket.id);
         });
 
         socket.on(settings.messages.DISCONNECT, () => {
@@ -32,6 +36,7 @@ class NetworkHandler extends EventEmitter {
     }
 
     _onDisconnection(socket) {
+        console.log('Player disconnected', socket.id);
         this.emit(NetworkHandler.events.DISCONNECT, socket.id);
     }
 
@@ -42,8 +47,16 @@ class NetworkHandler extends EventEmitter {
         });
     }
 
-    emitGameStarted() {
-        this._io.emit(settings.messages.GAME_STARTED);
+    emitRoomState(roomState) {
+        this._io.emit(settings.messages.ROOM_STATE, roomState);
+    }
+
+    emitGameRoundInitiated(players) {
+        this._io.emit(settings.messages.GAME_ROUND_INITIATED, players);
+    }
+
+    emitGameRoundCountdown(countdownValue) {
+        this._io.emit(settings.messages.GAME_ROUND_COUNTDOWN, countdownValue);
     }
 
     emitGameState(gameState) {
@@ -55,6 +68,7 @@ NetworkHandler.events = {
     CONNECT: 'on-connection',
     DISCONNECT: 'on-disconnection',
     PLAYER_ACTION: 'on-player-action',
+    CLIENT_LOADED: 'on-client-loaded',
 };
 
 module.exports = NetworkHandler;

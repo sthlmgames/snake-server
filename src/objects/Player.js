@@ -1,21 +1,17 @@
 const settings = require('../utils/settings');
 const BodyPart = require('./BodyPart');
 const PlayerColor = require('./PlayerColor');
-const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
 
 class Player {
 
-    constructor(id, position, color, alive, gridHandler) {
+    constructor(id, color) {
         this._id = id;
         this._color = color;
         this._bodyParts = [];
         this._direction = settings.playerActions.RIGHT;
-        this._alive = alive;
-        this._gridHandler = gridHandler;
-
-        this.expandBody(position, BodyPart.HEAD);
-        this.expandBody(position, BodyPart.BODY);
-        this.expandBody(position, BodyPart.BODY);
+        this._alive = true;
+        this._grid = null;
+        this._ready = false;
     }
 
     get id() {
@@ -69,12 +65,24 @@ class Player {
             this.isBelowBounds;
     }
 
+    get ready() {
+        return this._ready;
+    }
+
+    set ready(newValue) {
+        this._ready = newValue
+    }
+
     get serialized() {
         return {
             id: this._id,
             bodyParts: this._bodyParts.map(bodyPart => bodyPart.serialized),
             color: this._color.serialized,
         };
+    }
+
+    set grid(newValue) {
+        this._grid = newValue;
     }
 
     _handleWarpThroughWall(nextPosition) {
@@ -120,9 +128,15 @@ class Player {
         return nextPosition;
     }
 
+    initBody(position) {
+        this.expandBody(position, BodyPart.HEAD);
+        this.expandBody(position, BodyPart.BODY);
+        this.expandBody(position, BodyPart.BODY);
+    }
+
     kill() {
         this._alive = false;
-        this._bodyParts.forEach(bodyPart => this._gridHandler.removeObjectFromGrid(bodyPart));
+        this._bodyParts.forEach(bodyPart => this._grid.removeObjectFromGrid(bodyPart));
     }
 
     expandBody(position, type) {
@@ -130,14 +144,14 @@ class Player {
 
         this._bodyParts.push(newBodyPart);
 
-        this._gridHandler.occupyGridSquare(newBodyPart);
+        this._grid.occupyGridSquare(newBodyPart);
     }
 
     move() {
         const tail = this._bodyParts.pop(),
             nextPosition = this._getNextPosition(this.head);
 
-        this._gridHandler.removeObjectFromGrid(tail);
+        this._grid.removeObjectFromGrid(tail);
 
         this.head.type = BodyPart.BODY;
 
@@ -148,7 +162,14 @@ class Player {
         tail.x = nextPosition.x;
         tail.y = nextPosition.y;
 
-        this._gridHandler.occupyGridSquare(tail);
+        this._grid.occupyGridSquare(tail);
+    }
+
+    reset() {
+        this._bodyParts = [];
+        this._direction = settings.playerActions.RIGHT;
+        this._alive = true;
+        this._grid = null;
     }
 }
 
