@@ -93,6 +93,8 @@ class GameRound {
         for (const [index, player] of Array.from(this._players.values()).entries()) {
             const position = (settings.startPositions[index] || this._grid.randomGridPosition);
 
+            player.reset();
+
             this._actions.set(player.id, new Map());
 
             player.grid = this._grid;
@@ -171,9 +173,17 @@ class GameRound {
     }
 
     _handleDecideWinner() {
-        if (Array.from(this._players.values()).filter(player => player.alive).length === 1) {
+        const playersAlive = (Array.from(this._players.values()).filter(player => player.alive));
+        const playersDead = (Array.from(this._players.values()).filter(player => !player.alive));
+        const oneWinner = playersAlive.length === 1;
+        const draw = playersDead.length === this._players.size;
+
+        if (oneWinner) {
             this.stop();
-            this._onWinnerDecidedCallback();
+            this._onWinnerDecidedCallback(playersAlive);
+        } else if (draw) {
+            this.stop();
+            this._onWinnerDecidedCallback(playersDead);
         }
     }
 

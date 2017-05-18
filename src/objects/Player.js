@@ -11,7 +11,6 @@ class Player {
         this._direction = settings.playerActions.RIGHT;
         this._alive = true;
         this._grid = null;
-        this._score = 0;
         this._ready = false;
     }
 
@@ -164,6 +163,13 @@ class Player {
         tail.y = nextPosition.y;
 
         this._grid.occupyGridSquare(tail);
+    }
+
+    reset() {
+        this._bodyParts = [];
+        this._direction = settings.playerActions.RIGHT;
+        this._alive = true;
+        this._grid = null;
     }
 }
 
