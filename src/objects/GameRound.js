@@ -140,6 +140,11 @@ class GameRound extends EventEmitter {
     _onPlayerAction(payload) {
         const player = this._players.get(payload.id);
 
+        // TODO should this function even run when a player not in this GameRound submits a player action?
+        if (!player) {
+            return;
+        }
+
         let action;
 
         switch (payload.action.type) {
