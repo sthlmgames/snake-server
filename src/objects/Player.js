@@ -12,6 +12,7 @@ class Player {
         this._alive = true;
         this._grid = null;
         this._ready = false;
+        this._playing = false;
     }
 
     get id() {
@@ -71,6 +72,14 @@ class Player {
 
     set ready(newValue) {
         this._ready = newValue
+    }
+
+    get playing() {
+        return this._playing;
+    }
+
+    set playing(newValue) {
+        this._playing = newValue
     }
 
     get serialized() {
@@ -170,6 +179,7 @@ class Player {
         this._direction = settings.playerActions.RIGHT;
         this._alive = true;
         this._grid = null;
+        this._playing = false;
     }
 }
 

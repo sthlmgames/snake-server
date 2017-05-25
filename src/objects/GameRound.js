@@ -1,3 +1,6 @@
+const uuid = require('uuid/v4');
+const EventEmitter = require('events').EventEmitter;
+
 const settings = require('../utils/settings');
 const NetworkHandler = require('../handler/NetworkHandler');
 const CollisionHandler = require('../handler/CollisionHandler');
@@ -6,12 +9,13 @@ const Fruit = require('./Fruit');
 const BodyPart = require('./BodyPart');
 const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
 
-class GameRound {
+class GameRound extends EventEmitter {
 
-    constructor(networkHandler, players, onWinnerDecidedCallback) {
+    constructor(networkHandler, players) {
+        super();
+        this._id = uuid();
         this._networkHandler = networkHandler;
-        this._players = players;
-        this._onWinnerDecidedCallback = onWinnerDecidedCallback;
+        this._players = new Map(players);
 
         this._grid = new Grid();
         this._collisionHandler = new CollisionHandler(this._grid);
@@ -22,7 +26,7 @@ class GameRound {
         this._gameLoopTimerId = null;
         this._countdownTimerId = null;
 
-        this._playerActionListener = null;
+        this._playerActionListenerId = null;
 
         this._initPlayers();
         this._initCountdown();
@@ -30,8 +34,13 @@ class GameRound {
         this._networkHandler.emitGameRoundInitiated(this.initialState);
     }
 
+    get id() {
+        return this._id;
+    }
+
     get initialState() {
         const initialState = {
+            id: this.id,
             players: Array.from(this._players.values())
                 .map(player => player.serialized),
         };
@@ -42,6 +51,7 @@ class GameRound {
     // TODO rename to gameState
     get state() {
         const state = {
+            id: this.id,
             players: Array.from(this._players.values())
                 .filter(player => player.alive)
                 .map(player => player.serialized),
@@ -52,13 +62,13 @@ class GameRound {
     }
 
     _addListeners() {
-        this._playerActionListener = this._onPlayerAction.bind(this);
-        this._networkHandler.on(NetworkHandler.events.PLAYER_ACTION, this._playerActionListener);
+        this._playerActionListenerId = this._onPlayerAction.bind(this);
+        this._networkHandler.on(NetworkHandler.events.PLAYER_ACTION, this._playerActionListenerId);
     }
 
     _handleRemoveListeners() {
-        if (this._playerActionListener) {
-            this._networkHandler.removeListener(NetworkHandler.events.PLAYER_ACTION, this._playerActionListener);
+        if (this._playerActionListenerId) {
+            this._networkHandler.removeListener(NetworkHandler.events.PLAYER_ACTION, this._playerActionListenerId);
         }
     }
 
@@ -69,7 +79,7 @@ class GameRound {
     _initCountdown() {
         console.log('Game round countdown...');
 
-        let countdownValue = 3;
+        let countdownValue = settings.COUNTDOWN_THRESHOLD;
 
         this._countdownTimerId = setInterval(() => {
             console.log(countdownValue);
@@ -89,21 +99,26 @@ class GameRound {
         clearInterval(this._countdownTimerId);
     }
 
+    _resetPlayers() {
+        for (const player of Array.from(this._players.values())) {
+            player.reset();
+        }
+    }
+
     _initPlayers() {
         for (const [index, player] of Array.from(this._players.values()).entries()) {
             const position = (settings.startPositions[index] || this._grid.randomGridPosition);
 
-            player.reset();
-
             this._actions.set(player.id, new Map());
 
+            player.playing = true;
             player.grid = this._grid;
             player.initBody(position);
         }
     }
 
     _start() {
-        console.log('Room round started');
+        console.log('Game round started');
 
         this._addListeners();
 
@@ -113,15 +128,16 @@ class GameRound {
             this._handleExecuteActions();
             this._movePlayers();
             this._detectCollisions();
-            this._handleDecideWinner();
+
+            if (this._handleDecideWinner()) {
+                return; // clearInterval is called, but this._emitGameState below will still be called this tick if we don't return here
+            }
 
             this._emitGameState();
         }, settings.GAME_LOOP_TIMER);
     }
 
     _onPlayerAction(payload) {
-        console.log('_onPlayerAction', payload.id);
-
         const player = this._players.get(payload.id);
 
         let action;
@@ -180,11 +196,13 @@ class GameRound {
 
         if (oneWinner) {
             this.stop();
-            this._onWinnerDecidedCallback(playersAlive);
+            this.emit(GameRound.events.WINNER_DECIDED, playersAlive);
         } else if (draw) {
             this.stop();
-            this._onWinnerDecidedCallback(playersDead);
+            this.emit(GameRound.events.WINNER_DECIDED, playersDead);
         }
+
+        return (oneWinner || draw);
     }
 
     _detectCollisions() {
@@ -215,6 +233,7 @@ class GameRound {
                     if (gameObject instanceof Fruit) {
                         this._removeFruit(gameObject);
                         this._createFruit();
+                        // TODO include BodyPart type in this call, alternatively default in BodyPart constructor to 'BODY'
                         player.expandBody(player.head.position);
                         // Player to body part
                     } else if (gameObject instanceof BodyPart) {
@@ -242,8 +261,13 @@ class GameRound {
     stop() {
         this._handleRemoveListeners();
         this._stopCountdown();
+        this._resetPlayers();
         clearInterval(this._gameLoopTimerId);
     }
 }
+
+GameRound.events = {
+    WINNER_DECIDED: 'on-winner-decided',
+};
 
 module.exports = GameRound;

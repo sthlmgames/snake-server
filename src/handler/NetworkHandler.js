@@ -51,8 +51,8 @@ class NetworkHandler extends EventEmitter {
         this._io.emit(settings.messages.ROOM_STATE, roomState);
     }
 
-    emitGameRoundInitiated(players) {
-        this._io.emit(settings.messages.GAME_ROUND_INITIATED, players);
+    emitGameRoundInitiated(payload) {
+        this._io.emit(settings.messages.GAME_ROUND_INITIATED, payload);
     }
 
     emitGameRoundCountdown(countdownValue) {

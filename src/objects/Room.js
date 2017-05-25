@@ -1,3 +1,5 @@
+const uuid = require('uuid/v4');
+
 const settings = require('../utils/settings');
 const NetworkHandler = require('../handler/NetworkHandler');
 const Player = require('./Player');
@@ -6,6 +8,7 @@ const GameRound = require('./GameRound');
 class Room {
 
     constructor(networkHandler) {
+        this._id = uuid();
         this._players = new Map();
 
         this._gameRound = null;
@@ -17,8 +20,13 @@ class Room {
         this._networkHandler.on(NetworkHandler.events.DISCONNECT, this._onPlayerDisconnected.bind(this));
     }
 
+    get id() {
+        return this._id;
+    }
+
     get state() {
         const state = {
+            id: this.id,
             players: Array.from(this._players.values())
                 .map(player => player.serialized),
         };
@@ -37,20 +45,21 @@ class Room {
     _onClientLoaded(id) {
         this._players.get(id).ready = true;
 
+        // TODO don't emit this to clients currently playing, as the newly connected player has no position
         this._emitRoomState();
 
         this._handleCreateGameRound();
     }
 
     _handleCreateGameRound() {
-        const allPlayersLoaded = (Array.from(this._players.values()).filter(player => player.ready).length === this._players.size);
+        const allPlayersLoaded = (Array.from(this._players.values()).filter(player => player.ready && !player.playing).length === this._players.size);
 
-        if (this._players.size === settings.REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND && allPlayersLoaded) {
-            this._gameRound = new GameRound(this._networkHandler, this._players,
-                function onWinnerDecided() {
-                    // TODO change this recursive behaviour(it never ends)
-                    this._handleCreateGameRound();
-                }.bind(this));
+        if (this._players.size >= settings.REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND && allPlayersLoaded) {
+            this._gameRound = new GameRound(this._networkHandler, this._players);
+            this._gameRound.once(GameRound.events.WINNER_DECIDED, winners => {
+                // TODO change this recursive behaviour(it never ends)
+                this._handleCreateGameRound();
+            })
         }
     }
 
