@@ -66,7 +66,7 @@ class Room {
     _onPlayerDisconnected(id) {
         this._removePlayer(id);
 
-        const stopGameRound = this._players.size === 0 && this._gameRound;
+        const stopGameRound = this._players.size < settings.REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND && this._gameRound;
 
         if (stopGameRound) {
             this._gameRound.stop();
