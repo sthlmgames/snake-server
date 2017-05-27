@@ -18,6 +18,30 @@ class InverseDirectionAction extends Action {
         return true;
     }
 
+    _getNewDirectionWhenDividedByWalls(tail, tailMinusOne) {
+        let direction = this._player.direction;
+
+        // Divided by horizontal walls
+        if (tail.y === settings.world.HEIGHT - settings.GRID_SIZE &&
+            tailMinusOne.y === 0) {
+            direction = settings.playerActions.UP;
+        } else if (tailMinusOne.y === settings.world.HEIGHT - settings.GRID_SIZE &&
+            tail.y === 0) {
+            direction = settings.playerActions.DOWN;
+        }
+
+        // Divided by vertical walls
+        if (tail.x === settings.world.WIDTH - settings.GRID_SIZE &&
+            tailMinusOne.x === 0) {
+            direction = settings.playerActions.LEFT;
+        } else if (tailMinusOne.x === settings.world.WIDTH - settings.GRID_SIZE &&
+            tail.x === 0) {
+            direction = settings.playerActions.RIGHT;
+        }
+
+        return direction;
+    }
+
     execute() {
         if (!this.isValid) {
             return;
@@ -40,6 +64,8 @@ class InverseDirectionAction extends Action {
                 this._player.direction = settings.playerActions.LEFT;
             }
         }
+
+        this._player.direction = this._getNewDirectionWhenDividedByWalls(tail, tailMinusOne);
 
         this._player.bodyParts.reverse();
     }
