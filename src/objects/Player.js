@@ -43,6 +43,10 @@ class Player {
         return this._bodyParts[0];
     }
 
+    get bodyParts() {
+        return this._bodyParts;
+    }
+
     get isLeftOfBounds() {
         return this.head.x < 0;
     }

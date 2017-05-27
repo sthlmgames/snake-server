@@ -1,11 +1,12 @@
 const DIRECTION_ACTION = 'direction-action';
+const INVERSE_ACTION = 'inverse-action';
 
 const settings = {
     BACKGROUND_COLOR: '#000000',
     GRID_SIZE: 20,
     GAME_LOOP_TIMER: 100,
     GAME_ROUND_COUNTDOWN_TIMER: 500,
-    COUNTDOWN_THRESHOLD: 5,
+    COUNTDOWN_THRESHOLD: 3,
     REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND: 2,
     START_POSITION_OFFSET: 100,
     startPositions: [],
@@ -19,7 +20,6 @@ const settings = {
     },
 
     playerActions: {
-        DIRECTION_ACTION: DIRECTION_ACTION,
         UP: {
             type: DIRECTION_ACTION,
             value: 'UP',
@@ -36,6 +36,14 @@ const settings = {
             type: DIRECTION_ACTION,
             value: 'RIGHT',
         },
+        INVERSE: {
+            type: INVERSE_ACTION,
+        }
+    },
+
+    playerActionTypes: {
+        DIRECTION_ACTION: DIRECTION_ACTION,
+        INVERSE_ACTION: INVERSE_ACTION,
     },
 
     // WebSocket message protocol

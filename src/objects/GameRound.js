@@ -8,6 +8,7 @@ const Grid = require('./Grid');
 const Fruit = require('./Fruit');
 const BodyPart = require('./BodyPart');
 const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
+const InverseDirectionAction = require('../actions/InverseDirectionAction');
 
 class GameRound extends EventEmitter {
 
@@ -148,8 +149,11 @@ class GameRound extends EventEmitter {
         let action;
 
         switch (payload.action.type) {
-            case settings.playerActions.DIRECTION_ACTION:
+            case settings.playerActionTypes.DIRECTION_ACTION:
                 action = new ChangeDirectionAction(player, payload.action);
+                break;
+            case settings.playerActionTypes.INVERSE_ACTION:
+                action = new InverseDirectionAction(player);
                 break;
             default:
                 console.log('Unknown player action...');
@@ -166,7 +170,11 @@ class GameRound extends EventEmitter {
         for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
             const playerActions = this._actions.get(player.id);
 
-            // Change direction actions
+            if (playerActions.get(InverseDirectionAction.id)) {
+                playerActions.get(InverseDirectionAction.id).execute();
+                playerActions.delete(InverseDirectionAction.id);
+            }
+
             if (playerActions.get(ChangeDirectionAction.id)) {
                 playerActions.get(ChangeDirectionAction.id).execute();
                 playerActions.delete(ChangeDirectionAction.id);

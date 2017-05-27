@@ -11,7 +11,7 @@ class ChangeDirectionAction extends Action {
     }
 
     get id() {
-        return settings.playerActions.DIRECTION_ACTION;
+        return settings.playerActionTypes.DIRECTION_ACTION;
     }
 
     get isValid() {
@@ -29,6 +29,6 @@ class ChangeDirectionAction extends Action {
     }
 }
 
-ChangeDirectionAction.id = settings.playerActions.DIRECTION_ACTION;
+ChangeDirectionAction.id = settings.playerActionTypes.DIRECTION_ACTION;
 
 module.exports = ChangeDirectionAction;
