@@ -246,8 +246,7 @@ class GameRound extends EventEmitter {
                     if (gameObject instanceof Fruit) {
                         this._removeFruit(gameObject);
                         this._createFruit();
-                        // TODO include BodyPart type in this call, alternatively default in BodyPart constructor to 'BODY'
-                        player.expandBody(player.head.position);
+                        player.bodyPartsYetToBeBuilt = 1;
                         // Player to body part
                     } else if (gameObject instanceof BodyPart) {
                         playersToKill.push(player);

@@ -13,6 +13,7 @@ class Player {
         this._grid = null;
         this._ready = false;
         this._playing = false;
+        this._bodyPartsYetToBeBuilt = 0;
     }
 
     get id() {
@@ -98,6 +99,10 @@ class Player {
         this._grid = newValue;
     }
 
+    set bodyPartsYetToBeBuilt(newValue) {
+        this._bodyPartsYetToBeBuilt = this._bodyPartsYetToBeBuilt + newValue;
+    }
+
     _handleWarpThroughWall(nextPosition) {
         if (nextPosition.x < 0) {
             nextPosition.x = settings.world.WIDTH - settings.GRID_SIZE;
@@ -162,6 +167,7 @@ class Player {
 
     move() {
         const tail = this._bodyParts.pop(),
+            tailOldPosition = tail.position,
             nextPosition = this._getNextPosition(this.head);
 
         this._grid.removeObjectFromGrid(tail);
@@ -176,6 +182,11 @@ class Player {
         tail.y = nextPosition.y;
 
         this._grid.occupyGridSquare(tail);
+
+        if (this._bodyPartsYetToBeBuilt >= 1) {
+            this.expandBody(tailOldPosition, BodyPart.BODY);
+            this._bodyPartsYetToBeBuilt--;
+        }
     }
 
     reset() {
@@ -184,6 +195,7 @@ class Player {
         this._alive = true;
         this._grid = null;
         this._playing = false;
+        this._bodyPartsYetToBeBuilt = 0;
     }
 }
 
