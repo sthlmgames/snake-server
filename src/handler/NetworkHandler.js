@@ -13,7 +13,7 @@ class NetworkHandler extends EventEmitter {
     }
 
     _onConnection(socket) {
-        console.log('Player connected', socket.id);
+        logger.info('Player connected', socket.id);
 
         socket.emit(settings.messages.YOU_CONNECTED, {
             id: socket.id,
@@ -36,7 +36,7 @@ class NetworkHandler extends EventEmitter {
     }
 
     _onDisconnection(socket) {
-        console.log('Player disconnected', socket.id);
+        logger.info('Player disconnected', socket.id);
         this.emit(NetworkHandler.events.DISCONNECT, socket.id);
     }
 
