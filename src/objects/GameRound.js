@@ -10,6 +10,8 @@ const BodyPart = require('./BodyPart');
 const ChangeDirectionAction = require('../actions/ChangeDirectionAction');
 const InverseDirectionAction = require('../actions/InverseDirectionAction');
 
+const logger = require('../utils/logger');
+
 class GameRound extends EventEmitter {
 
     constructor(networkHandler, players) {
@@ -78,12 +80,12 @@ class GameRound extends EventEmitter {
     }
 
     _initCountdown() {
-        console.log('Game round countdown...');
+        logger.info('Game round countdown...');
 
         let countdownValue = settings.COUNTDOWN_THRESHOLD;
 
         this._countdownTimerId = setInterval(() => {
-            console.log(countdownValue);
+            logger.debug(countdownValue);
 
             this._networkHandler.emitGameRoundCountdown(countdownValue);
 
@@ -92,6 +94,8 @@ class GameRound extends EventEmitter {
             if (countdownValue === -1) {
                 this._stopCountdown();
                 this._start();
+                logger.info('Gameround Started');
+
             }
         }, settings.GAME_ROUND_COUNTDOWN_TIMER);
     }
@@ -119,7 +123,7 @@ class GameRound extends EventEmitter {
     }
 
     _start() {
-        console.log('Game round started');
+        logger.info('Game round started');
 
         this._addListeners();
 
@@ -156,7 +160,7 @@ class GameRound extends EventEmitter {
                 action = new InverseDirectionAction(player);
                 break;
             default:
-                console.log('Unknown player action...');
+                logger.info('Unknown player action...');
         }
 
         this._addPlayerAction(player.id, action);
