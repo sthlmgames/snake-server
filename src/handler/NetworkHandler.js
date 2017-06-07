@@ -2,6 +2,8 @@ const EventEmitter = require('events').EventEmitter;
 
 const settings = require('../utils/settings');
 
+const logger = require('../utils/logger');
+
 class NetworkHandler extends EventEmitter {
 
     constructor(io) {
