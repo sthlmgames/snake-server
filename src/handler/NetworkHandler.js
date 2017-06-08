@@ -25,6 +25,7 @@ class NetworkHandler extends EventEmitter {
         this.emit(NetworkHandler.events.CONNECT, socket.id);
 
         socket.on(settings.messages.CLIENT_LOADED, () => {
+            logger.info('Player loaded phaser', socket.id);
             this.emit(NetworkHandler.events.CLIENT_LOADED, socket.id);
         });
 
