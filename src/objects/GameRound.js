@@ -31,6 +31,9 @@ class GameRound extends EventEmitter {
 
         this._playerActionListenerId = null;
 
+        this._isCountingDown = false;
+        this._isRunning = false;
+
         this._initPlayers();
         this._initCountdown();
 
@@ -64,6 +67,14 @@ class GameRound extends EventEmitter {
         return state;
     }
 
+    get isCountingDown() {
+        return this._isCountingDown;
+    }
+
+    get isRunning() {
+        return this._isRunning;
+    }
+
     _addListeners() {
         this._playerActionListenerId = this._onPlayerAction.bind(this);
         this._networkHandler.on(NetworkHandler.events.PLAYER_ACTION, this._playerActionListenerId);
@@ -80,9 +91,11 @@ class GameRound extends EventEmitter {
     }
 
     _initCountdown() {
-        logger.info('Game round countdown...');
+        logger.info('Game round countdown...', this.id);
 
         let countdownValue = settings.COUNTDOWN_THRESHOLD;
+
+        this._isCountingDown = true;
 
         this._countdownTimerId = setInterval(() => {
             logger.debug(countdownValue);
@@ -94,13 +107,13 @@ class GameRound extends EventEmitter {
             if (countdownValue === -1) {
                 this._stopCountdown();
                 this._start();
-                logger.info('Gameround Started');
 
             }
         }, settings.GAME_ROUND_COUNTDOWN_TIMER);
     }
 
     _stopCountdown() {
+        this._isCountingDown = false;
         clearInterval(this._countdownTimerId);
     }
 
@@ -123,7 +136,9 @@ class GameRound extends EventEmitter {
     }
 
     _start() {
-        logger.info('Game round started');
+        logger.info('Game round started', this.id);
+
+        this._isRunning = true;
 
         this._addListeners();
 
@@ -275,10 +290,12 @@ class GameRound extends EventEmitter {
     }
 
     stop() {
+        this._isRunning = false;
         this._handleRemoveListeners();
         this._stopCountdown();
         this._resetPlayers();
         clearInterval(this._gameLoopTimerId);
+        logger.info('Game round stopped', this.id);
     }
 }
 

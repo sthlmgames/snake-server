@@ -52,9 +52,17 @@ class Room {
     }
 
     _handleCreateGameRound() {
-        const allPlayersLoaded = (Array.from(this._players.values()).filter(player => player.ready && !player.playing).length === this._players.size);
+        const numberOfPlayersRequiredAreEnough = (this._players.size >= settings.REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND);
+        const allPlayersLoaded = (Array.from(this._players.values()).filter(player => player.ready).length === this._players.size);
+        const gameRoundIsCountingDown = (this._gameRound && this._gameRound.isCountingDown);
 
-        if (this._players.size >= settings.REQUIRED_NUMBER_OF_PLAYERS_FOR_GAME_ROUND && allPlayersLoaded) {
+        if (gameRoundIsCountingDown) {
+            this._gameRound.stop();
+        }
+
+        const gameRoundIsNotRunning = !(this._gameRound && this._gameRound.isRunning);
+
+        if (numberOfPlayersRequiredAreEnough && allPlayersLoaded && gameRoundIsNotRunning) {
             this._gameRound = new GameRound(this._networkHandler, this._players);
             this._gameRound.once(GameRound.events.WINNER_DECIDED, winners => {
                 // TODO change this recursive behaviour(it never ends)
