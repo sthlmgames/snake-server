@@ -1,20 +1,19 @@
 class Action {
+  constructor () {
 
-    constructor() {
+  }
 
-    }
+  get id () {
+    return null
+  }
 
-    get id() {
-        return null;
-    }
+  get isValid () {
+    return true
+  }
 
-    get isValid() {
-        return true;
-    }
+  execute (player) {
 
-    execute(player) {
-
-    }
+  }
 }
 
-module.exports = Action;
+module.exports = Action
