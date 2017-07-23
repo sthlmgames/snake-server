@@ -44,10 +44,15 @@ class NetworkHandler extends EventEmitter {
     }
 
     _onPlayerAction(socket, payload) {
-        this.emit(NetworkHandler.events.PLAYER_ACTION, {
+        const context = {
             id: socket.id,
-            action: payload,
-        });
+            action: payload.action,
+            sequenceNumber: payload.sequenceNumber,
+        };
+
+        logger.info('Player action received', context);
+
+        this.emit(NetworkHandler.events.PLAYER_ACTION, context);
     }
 
     emitRoomState(roomState) {
