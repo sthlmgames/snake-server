@@ -150,8 +150,12 @@ class Player {
         const oldPosition = this.head.position,
             nextPosition = this._getNextPosition(this.head);
 
+        this._grid.removeObjectFromGrid(this.head);
+
         this.head.x = nextPosition.x;
         this.head.y = nextPosition.y;
+
+        this._grid.occupyGridSquare(this.head);
 
         return oldPosition;
     }
