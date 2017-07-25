@@ -190,7 +190,7 @@ class Player {
 
     expandBody(position) {
         const type = (!this._bodyParts.length && BodyPart.HEAD) || BodyPart.BODY;
-        const newBodyPart = new BodyPart(position, type, this);
+        const newBodyPart = new BodyPart(position, type);
 
         this._bodyParts.push(newBodyPart);
 

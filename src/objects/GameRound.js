@@ -267,10 +267,6 @@ class GameRound extends EventEmitter {
                         // Player to body part
                     } else if (gameObject instanceof BodyPart) {
                         collidingPlayers.push(player);
-
-                        if (gameObject.type === BodyPart.HEAD) {
-                            collidingPlayers.push(gameObject.player);
-                        }
                     }
                 }
             }
