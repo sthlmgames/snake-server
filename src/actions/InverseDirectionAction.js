@@ -1,6 +1,5 @@
 const settings = require('../utils/settings');
 const Action = require('./Action');
-const BodyPart = require('../objects/BodyPart');
 
 class InverseDirectionAction extends Action {
 
@@ -42,12 +41,24 @@ class InverseDirectionAction extends Action {
         return direction;
     }
 
-    execute() {
-        if (!this.isValid) {
-            return;
+    _inverseSingleBodyPart() {
+        switch (this._player.direction.value) {
+            case settings.playerActions.UP.value:
+                this._player.direction = settings.playerActions.DOWN;
+                break;
+            case settings.playerActions.DOWN.value:
+                this._player.direction = settings.playerActions.UP;
+                break;
+            case settings.playerActions.LEFT.value:
+                this._player.direction = settings.playerActions.RIGHT;
+                break;
+            case settings.playerActions.RIGHT.value:
+                this._player.direction = settings.playerActions.LEFT;
+                break;
         }
+    }
 
-        const bodyParts = this._player.bodyParts;
+    _inverseMultipleBodyParts(bodyParts) {
         const tail = bodyParts[bodyParts.length - 1];
         const tailMinusOne = bodyParts[bodyParts.length - 2];
 
@@ -68,6 +79,20 @@ class InverseDirectionAction extends Action {
         this._player.direction = this._getNewDirectionWhenDividedByWalls(tail, tailMinusOne);
 
         this._player.bodyParts.reverse();
+    }
+
+    execute() {
+        if (!this.isValid) {
+            return;
+        }
+
+        const bodyParts = this._player.bodyParts;
+
+        if (bodyParts.length === 1) {
+            this._inverseSingleBodyPart();
+        } else {
+            this._inverseMultipleBodyParts(bodyParts);
+        }
     }
 }
 
