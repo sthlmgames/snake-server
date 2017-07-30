@@ -146,26 +146,21 @@ class Player {
         return nextPosition;
     }
 
-    initBody(position) {
-        this.expandBody(position, BodyPart.HEAD);
-        this.expandBody(position, BodyPart.BODY);
-        this.expandBody(position, BodyPart.BODY);
+    _moveSingleBodyPart() {
+        const oldPosition = this.head.position,
+            nextPosition = this._getNextPosition(this.head);
+
+        this._grid.removeObjectFromGrid(this.head);
+
+        this.head.x = nextPosition.x;
+        this.head.y = nextPosition.y;
+
+        this._grid.occupyGridSquare(this.head);
+
+        return oldPosition;
     }
 
-    kill() {
-        this._alive = false;
-        this._bodyParts.forEach(bodyPart => this._grid.removeObjectFromGrid(bodyPart));
-    }
-
-    expandBody(position, type) {
-        const newBodyPart = new BodyPart(position, type, this);
-
-        this._bodyParts.push(newBodyPart);
-
-        this._grid.occupyGridSquare(newBodyPart);
-    }
-
-    move() {
+    _moveMultipleBodyParts() {
         const tail = this._bodyParts.pop(),
             tailOldPosition = tail.position,
             nextPosition = this._getNextPosition(this.head);
@@ -182,6 +177,50 @@ class Player {
         tail.y = nextPosition.y;
 
         this._grid.occupyGridSquare(tail);
+
+        return tailOldPosition;
+    }
+
+    initBody(position) {
+        for (let i = 0; i < settings.NUMBER_OF_INITIAL_BODY_PARTS; i++) {
+            this.expandBody(position);
+        }
+    }
+
+    kill() {
+        this._alive = false;
+        this._bodyParts.forEach(bodyPart => this._grid.removeObjectFromGrid(bodyPart));
+    }
+
+    expandBody(position) {
+        const type = (!this._bodyParts.length && BodyPart.HEAD) || BodyPart.BODY;
+        const newBodyPart = new BodyPart(position, type);
+
+        this._bodyParts.push(newBodyPart);
+
+        this._grid.occupyGridSquare(newBodyPart);
+    }
+
+    reduceBody() {
+        const head = this._bodyParts.shift();
+
+        this._grid.removeObjectFromGrid(head);
+
+        if (this._bodyParts.length) {
+            this.head.type = BodyPart.HEAD;
+        } else {
+            this.kill();
+        }
+    }
+
+    move() {
+        let tailOldPosition = null;
+
+        if (this._bodyParts.length === 1) {
+            tailOldPosition = this._moveSingleBodyPart();
+        } else {
+            tailOldPosition = this._moveMultipleBodyParts();
+        }
 
         if (this._bodyPartsYetToBeBuilt >= 1) {
             this.expandBody(tailOldPosition, BodyPart.BODY);

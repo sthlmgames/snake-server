@@ -241,13 +241,11 @@ class GameRound extends EventEmitter {
 
         function detectPlayerWithWorldBoundsCollision() {
             // Player to world bounds collision
-            if (settings.mode === settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
-                for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
-                    const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
+            for (const player of Array.from(this._players.values()).filter(player => player.alive)) {
+                const collision = this._collisionHandler.playerWithWorldBoundsCollision(player);
 
-                    if (collision) {
-                        player.kill();
-                    }
+                if (collision) {
+                    collidingPlayers.push(player);
                 }
             }
         }
@@ -268,24 +266,21 @@ class GameRound extends EventEmitter {
                         player.bodyPartsYetToBeBuilt = 1;
                         // Player to body part
                     } else if (gameObject instanceof BodyPart) {
-                        playersToKill.push(player);
-
-                        if (gameObject.type === BodyPart.HEAD) {
-                            playersToKill.push(gameObject.player);
-                        }
+                        collidingPlayers.push(player);
                     }
                 }
             }
         }
 
-        const playersToKill = [];
+        const collidingPlayers = [];
 
-        detectPlayerWithWorldBoundsCollision.call(this);
+        if (settings.mode === settings.modes.BLOCKED_BY_WORLD_BOUNDS) {
+            detectPlayerWithWorldBoundsCollision.call(this);
+        }
         detectPlayerWithGameObjectCollision.call(this);
 
-        // Kill players
-        for (const player of playersToKill) {
-            player.kill();
+        for (const player of collidingPlayers) {
+            player.reduceBody();
         }
     }
 

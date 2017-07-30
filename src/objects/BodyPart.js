@@ -2,10 +2,9 @@ const GameObject = require('./GameObject');
 
 class BodyPart extends GameObject {
 
-    constructor(position, type, player) {
+    constructor(position, type) {
         super(position);
         this._type = type;
-        this._player = player;
     }
 
     get type() {
@@ -14,10 +13,6 @@ class BodyPart extends GameObject {
 
     set type(value) {
         this._type = value;
-    }
-
-    get player() {
-        return this._player;
     }
 }
 
